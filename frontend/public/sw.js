@@ -7,8 +7,8 @@
  * continues to render uninterrupted even when cellular networks fail completely.
  */
 
-const CACHE_STATIC_NAME = 'mdoner-static-v3';
-const CACHE_TILES_NAME = 'mdoner-tiles-v2';
+const CACHE_STATIC_NAME = 'mdoner-static-v4';
+const CACHE_TILES_NAME = 'mdoner-tiles-v3';
 
 const STATIC_ASSETS = [
   '/',

@@ -132,7 +132,7 @@ export default function LandslideCommandMap({
         {/* High-Contrast Dark CartoDB Map Tiles */}
         <TileLayer
           attribution='&copy; <a href="https://carto.com/">CartoDB</a> Dark Matter &bull; MDoNER GIS'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?api_key=cb1_2sr7_1_cd4cd1518630c30427989017"
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2sr7_1_cd4cd1518630c30427989017"
         />
 
         {/* Render Vulnerable Zone MultiPolygons */}
