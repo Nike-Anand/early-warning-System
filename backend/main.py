@@ -31,6 +31,8 @@ predictive_engine = LandslidePredictiveEngine()
 alert_service = AlertMicroservice()
 
 
+from live_weather_worker import fetch_and_push_weather
+
 # ==============================================================================
 # LIFESPAN & ASYNC WORKER MANAGEMENT
 # ==============================================================================
@@ -39,11 +41,16 @@ async def lifespan(app: FastAPI):
     logger.info("MDoNER Disaster Management Services starting...")
     # Start Redis retry queue background drainer
     worker_task = asyncio.create_task(alert_service.drain_retry_queue_worker())
+    
+    # Start Open-Meteo Live Satellite Data Fetcher
+    weather_task = asyncio.create_task(fetch_and_push_weather())
+    
     yield
     logger.info("Shutting down background tasks gracefully...")
     worker_task.cancel()
+    weather_task.cancel()
     try:
-        await worker_task
+        await asyncio.gather(worker_task, weather_task, return_exceptions=True)
     except asyncio.CancelledError:
         pass
 
