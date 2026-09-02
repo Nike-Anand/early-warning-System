@@ -421,7 +421,8 @@ def seed_database():
                 z["friction_angle"], z["unit_weight"], z["soil_depth"],
                 z["status"], z["fos"], z["population_density"]
             ))
-            row = cur.fetchon            zone_id_map[z["code"]] = row["zone_id"]
+            row = cur.fetchone()
+            zone_id_map[z["code"]] = row["zone_id"]
             print(f"   [+] Added Zone [{z['code']}]: {z['name']} ({z['state']})")
 
         print("\n[2/5] Seeding Critical Infrastructure Elements (Highways & Settlements)...")
@@ -549,7 +550,7 @@ def seed_database():
                 res["lon"], res["lat"], res["personnel"],
                 res["officer"], res["phone"], res["is_deployed"]
             ))
-            print(f"   [+] Added Emergency Asset: {res['name']} ({res['unit_type']})")
+            print(f"   [+] Added Emergency Asset: {res['name']} ({res['type']})")
 
         conn.commit()
         print("\n" + "=" * 80)
