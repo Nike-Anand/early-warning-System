@@ -7,8 +7,8 @@
  * continues to render uninterrupted even when cellular networks fail completely.
  */
 
-const CACHE_STATIC_NAME = 'mdoner-static-v2';
-const CACHE_TILES_NAME = 'mdoner-tiles-v1';
+const CACHE_STATIC_NAME = 'mdoner-static-v3';
+const CACHE_TILES_NAME = 'mdoner-tiles-v2';
 
 const STATIC_ASSETS = [
   '/',
@@ -52,6 +52,7 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event: Cache-First for Map Tiles & Stale-While-Revalidate for UI
 self.addEventListener('fetch', (event) => {
+  if (!event.request.url.startsWith('http')) return;
   const url = new URL(event.request.url);
 
   // 1. Map Tiles Interception (CartoDB, OpenStreetMap, Mapbox tile requests)
@@ -70,7 +71,8 @@ self.addEventListener('fetch', (event) => {
         try {
           const networkResponse = await fetch(event.request);
           if (networkResponse && networkResponse.status === 200) {
-            cache.put(event.request, networkResponse.clone());
+            const responseToCache = networkResponse.clone();
+            cache.put(event.request, responseToCache);
           }
           return networkResponse;
         } catch (networkError) {
@@ -92,8 +94,9 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_STATIC_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
+            cache.put(event.request, responseToCache);
           });
         }
         return networkResponse;
