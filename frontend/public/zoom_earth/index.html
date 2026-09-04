@@ -43,6 +43,26 @@
 <link as="font" crossorigin="anonymous" href="assets/fonts/museo-sans-cyrl-500.woff2" rel="preload" type="font/woff2"/>
 <link as="font" crossorigin="anonymous" href="assets/fonts/museo-sans-cyrl-700.woff2" rel="preload" type="font/woff2"/>
 <link as="font" crossorigin="anonymous" href="assets/fonts/museo-sans-cyrl-900.woff2" rel="preload" type="font/woff2"/>
+<style>
+  /* Shift Zoom Earth native UI inwards to avoid overlapping with MDoNER React Sidebars */
+  
+  /* Left edge UI (Shift right by 400px to clear the Vulnerable Sectors panel) */
+  .layers, .layers-dropdown, .group.overlays, .legend, .panel.layers, .panel.overlays, .notices {
+      margin-left: 400px !important; 
+      z-index: 10 !important;
+  }
+  
+  /* Right edge UI (Shift left by 320px to clear the KPI Metrics panel) */
+  .search, .settings, .about, .share, .geolocation, .title, .title-badge, .group.measure, .group.zoom {
+      margin-right: 340px !important;
+      z-index: 10 !important;
+  }
+  
+  /* Slightly lift the bottom timeline so it isn't cramped */
+  .panel.time {
+      margin-bottom: 20px !important;
+  }
+</style>
 </head>
 <body>
 <main class="layer-satellite ui-blur ui-blur-dark ui-clock ui-ad-none ui-time-24">
