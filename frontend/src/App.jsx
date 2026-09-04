@@ -52,10 +52,9 @@ export default function App() {
     try {
       // 1. Fetch Zones GeoJSON
       const zonesRes = await fetch('/api/v1/zones');
-      if (zonesRes.ok) {
-        const zonesData = await zonesRes.json();
-        setZones(zonesData.features || []);
-      }
+      if (!zonesRes.ok) throw new Error("Backend offline");
+      const zonesData = await zonesRes.json();
+      setZones(zonesData.features || []);
 
       // 2. Fetch Infrastructure GeoJSON
       const infraRes = await fetch('/api/v1/infrastructure');
@@ -72,6 +71,42 @@ export default function App() {
       }
     } catch (err) {
       console.warn("Backend fetch failed, relying on mock/fallback state:", err);
+      // Inject Mock Data so the application remains functional for testing/demonstration without a backend
+      setZones([
+        {
+          type: 'Feature',
+          properties: { zone_id: 'z1', zone_name: 'Shillong Bypass', current_risk_status: 'CRITICAL', district: 'East Khasi Hills', state: 'Meghalaya', current_fos: 0.85, average_slope_angle: 45, historical_incident_count: 12, soil_type: 'Clay Loam' },
+          geometry: { type: 'Polygon', coordinates: [[[91.88, 25.57], [91.90, 25.57], [91.90, 25.59], [91.88, 25.59], [91.88, 25.57]]] }
+        },
+        {
+          type: 'Feature',
+          properties: { zone_id: 'z2', zone_name: 'Guwahati - Dispur Route', current_risk_status: 'HIGH', district: 'Kamrup', state: 'Assam', current_fos: 1.15, average_slope_angle: 38, historical_incident_count: 5, soil_type: 'Sandy Loam' },
+          geometry: { type: 'Polygon', coordinates: [[[91.75, 26.12], [91.78, 26.12], [91.78, 26.15], [91.75, 26.15], [91.75, 26.12]]] }
+        },
+        {
+          type: 'Feature',
+          properties: { zone_id: 'z3', zone_name: 'Delhi Test Sector', current_risk_status: 'MEDIUM', district: 'New Delhi', state: 'Delhi', current_fos: 1.4, average_slope_angle: 15, historical_incident_count: 0, soil_type: 'Alluvial' },
+          geometry: { type: 'Polygon', coordinates: [[[77.15, 28.55], [77.25, 28.55], [77.25, 28.65], [77.15, 28.65], [77.15, 28.55]]] }
+        }
+      ]);
+
+      setSensorNodes([
+        { node_id: 'n1', lon: 91.89, lat: 25.58, node_code: 'SHL-01', node_name: 'Shillong Node Alpha', risk_status: 'CRITICAL' },
+        { node_id: 'n2', lon: 91.76, lat: 26.13, node_code: 'GWH-02', node_name: 'Guwahati Node Beta', risk_status: 'HIGH' },
+        { node_id: 'n3', lon: 77.20, lat: 28.60, node_code: 'DEL-01', node_name: 'Delhi Reference Node', risk_status: 'SAFE' }
+      ]);
+
+      setInfrastructure([
+        {
+          type: 'Feature',
+          properties: { element_id: 'i1', name: 'NH-6 Segment A', current_status: 'blocked' },
+          geometry: { type: 'LineString', coordinates: [[91.88, 25.57], [91.89, 25.58], [91.90, 25.59]] }
+        }
+      ]);
+
+      setCitizenReports([
+        { report_id: 'r1', lat: 25.585, lng: 91.895, hazard_type: 'Minor Rockfall', status: 'UNVERIFIED' }
+      ]);
     } finally {
       setIsLoading(false);
     }
