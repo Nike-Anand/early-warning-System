@@ -263,24 +263,39 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-slate-950 font-sans text-slate-100 selection:bg-indigo-500 selection:text-white">
+    <div className="relative h-screen w-screen bg-slate-950 font-sans text-slate-100 selection:bg-indigo-500 selection:text-white overflow-hidden">
+      
       {/* ========================================================================= */}
-      {/* 1. TOP COMMAND BAR */}
+      {/* 1. MAIN BACKGROUND: CESIUM 3D GLOBE */}
       {/* ========================================================================= */}
-      <header className="h-16 px-5 bg-slate-900 border-b border-slate-800 flex items-center justify-between shadow-md z-30 flex-shrink-0">
+      <main className="absolute inset-0 z-0">
+        <LandslideCommandMap
+          zones={zones}
+          infrastructure={infrastructure}
+          sensorNodes={sensorNodes}
+          citizenReports={citizenReports}
+          selectedTarget={selectedTarget}
+          onTriggerAlert={handleTriggerBroadcast}
+        />
+      </main>
+
+      {/* ========================================================================= */}
+      {/* 2. FLOATING TOP COMMAND BAR (GLASSMORPHISM) */}
+      {/* ========================================================================= */}
+      <header className="absolute top-0 inset-x-0 h-16 px-5 bg-slate-950/40 backdrop-blur-md border-b border-white/10 flex items-center justify-between shadow-lg z-30 pointer-events-auto">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-gradient-to-tr from-indigo-600 to-rose-600 rounded-xl text-white shadow-lg shadow-indigo-600/30">
             <ShieldAlert size={22} />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-base font-extrabold tracking-tight text-white">MDoNER GIS Command Center</h1>
-              <span className="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-[10px] font-mono px-1.5 py-0.5 rounded">
+              <h1 className="text-base font-extrabold tracking-tight text-white drop-shadow-md">MDoNER GIS Command Center</h1>
+              <span className="bg-white/10 text-white/90 backdrop-blur-sm border border-white/20 text-[10px] font-mono px-1.5 py-0.5 rounded shadow-sm">
                 SIH ID 26001
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">
-              AI-Based Early Warning & Landslide Risk Monitoring System &bull; North Eastern Region
+            <p className="text-[11px] text-slate-300 drop-shadow-sm font-medium">
+              AI-Based Early Warning & Landslide Risk Monitoring System &bull; NER
             </p>
           </div>
         </div>
@@ -288,25 +303,25 @@ export default function App() {
         {/* Action Controls */}
         <div className="flex items-center space-x-3">
           {/* Live Stream Heartbeat */}
-          <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-full text-xs">
+          <div className="flex items-center space-x-2 px-3 py-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-xs shadow-md">
             <span
               className={`h-2.5 w-2.5 rounded-full ${wsConnected ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-rose-500 animate-ping'}`}
             ></span>
-            <span className="text-slate-300 font-semibold text-[11px]">
-              {wsConnected ? 'TELEMETRY STREAM LIVE' : 'OFFLINE - RECONNECTING'}
+            <span className="text-slate-200 font-semibold text-[11px] tracking-wide">
+              {wsConnected ? 'LIVE TELEMETRY' : 'RECONNECTING'}
             </span>
           </div>
 
           {/* Live IST Clock */}
-          <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-full">
-            <span className="text-[10px] text-slate-400 font-semibold">IST</span>
-            <span className="font-mono text-xs text-indigo-300 font-bold">{liveTime}</span>
+          <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full shadow-md">
+            <span className="text-[10px] text-slate-400 font-bold tracking-widest">IST</span>
+            <span className="font-mono text-xs text-white font-bold tracking-wider">{liveTime}</span>
           </div>
 
           {/* Quick Action Buttons */}
           <button
             onClick={() => setIsReportingOpen(true)}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition-all"
+            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-lg shadow-indigo-600/40 transition-all border border-indigo-400/50"
           >
             <PlusCircle size={14} />
             <span>Field Report</span>
@@ -314,15 +329,15 @@ export default function App() {
 
           <button
             onClick={() => setIsSimulationOpen(true)}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+            className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-slate-200 backdrop-blur-md border border-white/10 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-md"
           >
             <Sliders size={14} className="text-indigo-400" />
-            <span>What-If Simulator</span>
+            <span>Simulator</span>
           </button>
 
           <button
             onClick={() => setIsCitizenFeedOpen(true)}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+            className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-slate-200 backdrop-blur-md border border-white/10 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-md"
           >
             <Camera size={14} className="text-amber-400" />
             <span>Citizen Feed ({citizenReports.length})</span>
@@ -330,16 +345,16 @@ export default function App() {
 
           <button
             onClick={() => setIsResourcesOpen(true)}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+            className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-slate-200 backdrop-blur-md border border-white/10 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-md"
           >
             <Truck size={14} className="text-emerald-400" />
-            <span>Emergency Assets</span>
+            <span>Assets</span>
           </button>
 
           <button
             onClick={fetchData}
             title="Refresh Central GIS Datasets"
-            className="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-white border border-slate-700 transition-colors"
+            className="p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-xl text-slate-300 hover:text-white border border-white/10 transition-colors shadow-md"
           >
             <RefreshCw size={15} />
           </button>
@@ -348,16 +363,16 @@ export default function App() {
 
       {/* Emergency Siren Banner Overlay */}
       {activeEmergencyNotice && (
-        <div className="bg-gradient-to-r from-rose-700 via-rose-600 to-amber-600 px-5 py-2 flex items-center justify-between text-xs font-bold text-white shadow-lg animate-pulse z-20">
+        <div className="absolute top-16 inset-x-0 bg-gradient-to-r from-rose-700/90 via-rose-600/90 to-amber-600/90 backdrop-blur-md px-5 py-2 flex items-center justify-between text-xs font-bold text-white shadow-xl animate-pulse z-20 border-b border-rose-400/50">
           <div className="flex items-center space-x-2">
             <AlertTriangle size={18} />
-            <span>{activeEmergencyNotice.title}</span>
-            <span className="font-normal opacity-90">• {activeEmergencyNotice.msg}</span>
+            <span className="drop-shadow-md">{activeEmergencyNotice.title}</span>
+            <span className="font-normal opacity-90 drop-shadow-md">• {activeEmergencyNotice.msg}</span>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setSelectedTarget({ lat: activeEmergencyNotice.coords[0], lng: activeEmergencyNotice.coords[1], zoom: 11 })}
-              className="px-2.5 py-1 bg-black/40 hover:bg-black/60 rounded text-[11px] font-semibold"
+              className="px-2.5 py-1 bg-black/40 hover:bg-black/60 backdrop-blur-sm border border-white/20 rounded text-[11px] font-semibold transition-colors"
             >
               Zoom to Hazard
             </button>
@@ -372,209 +387,196 @@ export default function App() {
       )}
 
       {/* ========================================================================= */}
-      {/* 2. KPI METRIC COUNTER ROW */}
+      {/* 3. FLOATING KPI METRICS (RIGHT SIDE) */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-4 gap-3 px-5 py-2.5 bg-slate-950 border-b border-slate-800/80 z-10 flex-shrink-0">
+      <div className="absolute top-24 right-5 w-64 space-y-3 z-10 pointer-events-none">
         {/* KPI 1: Critical Failures */}
-        <div className="bg-slate-900/80 border border-rose-500/30 p-3 rounded-xl flex items-center justify-between shadow-sm">
+        <div className="bg-slate-950/50 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex items-center justify-between shadow-2xl pointer-events-auto hover:bg-slate-950/70 transition-colors">
           <div>
-            <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider block">
-              Critical Hazard Zones (FoS &lt; 1.0)
+            <span className="text-[9px] font-bold text-rose-400 uppercase tracking-widest block drop-shadow-md">
+              Critical Zones (FoS &lt; 1.0)
             </span>
-            <div className="text-xl font-extrabold text-white mt-0.5">{kpis.criticalZones}</div>
+            <div className="text-xl font-black text-white mt-0.5 drop-shadow-lg">{kpis.criticalZones}</div>
           </div>
-          <div className="p-2 bg-rose-500/20 text-rose-400 rounded-lg">
-            <Flame size={20} />
+          <div className="p-2 bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
+            <Flame size={18} />
           </div>
         </div>
 
         {/* KPI 2: High Risk Corridors */}
-        <div className="bg-slate-900/80 border border-amber-500/30 p-3 rounded-xl flex items-center justify-between shadow-sm">
+        <div className="bg-slate-950/50 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex items-center justify-between shadow-2xl pointer-events-auto hover:bg-slate-950/70 transition-colors">
           <div>
-            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">
-              High Risk Orange Sectors
+            <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest block drop-shadow-md">
+              High Risk Sectors
             </span>
-            <div className="text-xl font-extrabold text-white mt-0.5">{kpis.highZones}</div>
+            <div className="text-xl font-black text-white mt-0.5 drop-shadow-lg">{kpis.highZones}</div>
           </div>
-          <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
-            <AlertTriangle size={20} />
+          <div className="p-2 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+            <AlertTriangle size={18} />
           </div>
         </div>
 
         {/* KPI 3: Blocked Highways */}
-        <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl flex items-center justify-between shadow-sm">
+        <div className="bg-slate-950/50 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex items-center justify-between shadow-2xl pointer-events-auto hover:bg-slate-950/70 transition-colors">
           <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              Blocked Highway Networks
+            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block drop-shadow-md">
+              Blocked Highways
             </span>
-            <div className="text-xl font-extrabold text-white mt-0.5">{kpis.blockedRoads}</div>
+            <div className="text-xl font-black text-white mt-0.5 drop-shadow-lg">{kpis.blockedRoads}</div>
           </div>
-          <div className="p-2 bg-slate-800 text-rose-400 rounded-lg">
-            <Compass size={20} />
+          <div className="p-2 bg-white/5 text-rose-400 rounded-xl border border-white/10">
+            <Compass size={18} />
           </div>
         </div>
 
         {/* KPI 4: Online Telemetry Hardware */}
-        <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl flex items-center justify-between shadow-sm">
+        <div className="bg-slate-950/50 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex items-center justify-between shadow-2xl pointer-events-auto hover:bg-slate-950/70 transition-colors">
           <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block drop-shadow-md">
               Active Slope IoT Nodes
             </span>
-            <div className="text-xl font-extrabold text-emerald-400 mt-0.5">{kpis.totalSensors}</div>
+            <div className="text-xl font-black text-emerald-400 mt-0.5 drop-shadow-lg">{kpis.totalSensors}</div>
           </div>
-          <div className="p-2 bg-slate-800 text-emerald-400 rounded-lg">
-            <Radio size={20} />
+          <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+            <Radio size={18} />
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. MAIN WORKSPACE: SIDEBAR + GIS MAP CANVAS */}
+      {/* 4. FLOATING LEFT SIDEBAR: SEARCH & LIVE HAZARD STREAM */}
       {/* ========================================================================= */}
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* LEFT SIDEBAR: SEARCH & LIVE HAZARD STREAM */}
-        <aside className="w-[380px] bg-slate-900 border-r border-slate-800 flex flex-col shadow-2xl z-10 flex-shrink-0">
-          {/* Search & State Filter */}
-          <div className="p-3.5 border-b border-slate-800 space-y-2.5 bg-slate-900/70">
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 text-slate-500" size={15} />
-              <input
-                type="text"
-                placeholder="Search zones, NH routes, districts..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-              />
-            </div>
+      <aside className="absolute left-5 top-24 bottom-8 w-[380px] bg-slate-950/50 backdrop-blur-2xl border border-white/10 rounded-3xl flex flex-col shadow-[0_0_40px_rgba(0,0,0,0.5)] z-10 overflow-hidden pointer-events-auto">
+        {/* Search & State Filter */}
+        <div className="p-4 border-b border-white/10 space-y-3 bg-white/5">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-2.5 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search zones, NH routes, districts..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all shadow-inner"
+            />
+          </div>
 
-            {/* State Filter Pills */}
-            <div className="flex space-x-1.5 overflow-x-auto pb-1 text-[11px] custom-scrollbar">
-              {['ALL', 'Meghalaya', 'Assam', 'Sikkim', 'Mizoram', 'Nagaland', 'Arunachal Pradesh', 'Manipur', 'Tripura'].map((st) => (
-                <button
-                  key={st}
-                  onClick={() => setSelectedState(st)}
-                  className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${selectedState === st ? 'bg-indigo-600 text-white' : 'bg-slate-950 text-slate-400 hover:bg-slate-800'}`}
-                >
-                  {st}
-                </button>
+          {/* State Filter Pills */}
+          <div className="flex space-x-1.5 overflow-x-auto pb-1 text-[11px] custom-scrollbar">
+            {['ALL', 'Meghalaya', 'Assam', 'Sikkim', 'Mizoram', 'Nagaland', 'Arunachal Pradesh', 'Manipur', 'Tripura'].map((st) => (
+              <button
+                key={st}
+                onClick={() => setSelectedState(st)}
+                className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all shadow-sm ${selectedState === st ? 'bg-indigo-500 text-white shadow-indigo-500/30' : 'bg-black/30 border border-white/5 text-slate-300 hover:bg-white/10'}`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Severity Ranked Zone Cards Stream */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+          <div className="flex items-center justify-between text-[10px] font-bold tracking-widest text-slate-300 uppercase pb-1 drop-shadow-sm">
+            <span>Vulnerable Sectors ({filteredZones.length})</span>
+            <span className="text-indigo-400">SRID 4326</span>
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl space-y-3 animate-pulse">
+                  <div className="flex justify-between">
+                    <div className="h-3 w-32 bg-white/10 rounded"></div>
+                    <div className="h-3 w-14 bg-white/10 rounded"></div>
+                  </div>
+                  <div className="h-2 w-24 bg-white/5 rounded"></div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[1,2,3].map(j => <div key={j} className="h-10 bg-white/5 rounded-xl"></div>)}
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
-
-          {/* Severity Ranked Zone Cards Stream */}
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-3 custom-scrollbar">
-            <div className="flex items-center justify-between text-[11px] font-bold tracking-wider text-slate-400 uppercase pb-0.5">
-              <span>Vulnerable Slope Corridors ({filteredZones.length})</span>
-              <span className="text-[10px] font-mono text-indigo-400">SRID 4326</span>
+          ) : filteredZones.length === 0 ? (
+            <div className="text-center py-12 text-slate-400 text-xs border border-dashed border-white/20 rounded-2xl bg-black/20">
+              No vulnerable sectors found matching filters.
             </div>
+          ) : (
+            filteredZones.map((zone) => {
+              const p = zone.properties;
+              const status = p.current_risk_status;
+              const isCritical = status === 'CRITICAL';
+              const isHigh = status === 'HIGH';
 
-            {isLoading ? (
-              <div className="space-y-3">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="p-3.5 bg-slate-950 border border-slate-800 rounded-xl space-y-2.5 animate-pulse">
-                    <div className="flex justify-between">
-                      <div className="h-3 w-32 bg-slate-800 rounded"></div>
-                      <div className="h-3 w-14 bg-slate-700 rounded"></div>
+              const coords = zone.geometry?.coordinates?.[0]?.[0] || [];
+              const centerLat = coords.length > 0 ? coords[0][1] : 26.14;
+              const centerLon = coords.length > 0 ? coords[0][0] : 91.73;
+
+              return (
+                <div
+                  key={p.zone_id}
+                  onClick={() => setSelectedTarget({ lat: centerLat, lng: centerLon, zoom: 11 })}
+                  className={`p-4 bg-black/40 border rounded-2xl backdrop-blur-md hover:bg-black/60 transition-all cursor-pointer shadow-lg space-y-3 group relative overflow-hidden ${isCritical ? 'border-rose-500/50 hover:border-rose-400' : isHigh ? 'border-amber-500/40 hover:border-amber-400' : 'border-white/10 hover:border-white/30'}`}
+                >
+                  {/* Subtle gradient glow for critical items */}
+                  {isCritical && <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent pointer-events-none"></div>}
+                  
+                  <div className="flex items-start justify-between gap-2 relative z-10">
+                    <div>
+                      <h4 className="font-extrabold text-sm text-white group-hover:text-indigo-300 transition-colors line-clamp-1 drop-shadow-md">
+                        {p.zone_name}
+                      </h4>
+                      <p className="text-[11px] text-slate-300 mt-0.5 drop-shadow-sm font-medium">
+                        {p.district}, <span className="text-white">{p.state}</span>
+                      </p>
                     </div>
-                    <div className="h-2 w-24 bg-slate-800 rounded"></div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[1,2,3].map(j => <div key={j} className="h-8 bg-slate-800/60 rounded-lg"></div>)}
-                    </div>
+
+                    <span
+                      className={`px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-widest flex-shrink-0 shadow-md border ${isCritical ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-rose-500/30' : isHigh ? 'bg-amber-500/20 text-amber-300 border-amber-500/50' : status === 'MEDIUM' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50'}`}
+                    >
+                      {status}
+                    </span>
                   </div>
-                ))}
-              </div>
-            ) : filteredZones.length === 0 ? (
-              <div className="text-center py-12 text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl">
-                No vulnerable sectors found matching filters.
-              </div>
-            ) : (
-              filteredZones.map((zone) => {
-                const p = zone.properties;
-                const status = p.current_risk_status;
-                const isCritical = status === 'CRITICAL';
-                const isHigh = status === 'HIGH';
 
-                // Extract approximate center coordinates from polygon
-                const coords = zone.geometry?.coordinates?.[0]?.[0] || [];
-                const centerLat = coords.length > 0 ? coords[0][1] : 26.14;
-                const centerLon = coords.length > 0 ? coords[0][0] : 91.73;
-
-                return (
-                  <div
-                    key={p.zone_id}
-                    onClick={() => setSelectedTarget({ lat: centerLat, lng: centerLon, zoom: 11 })}
-                    className={`p-3.5 bg-slate-950 border rounded-xl hover:border-indigo-500 transition-all cursor-pointer shadow-sm space-y-2.5 group ${isCritical ? 'border-rose-500/50 hover:border-rose-400 shadow-rose-950/20' : isHigh ? 'border-amber-500/40' : 'border-slate-800'}`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-bold text-xs text-slate-200 group-hover:text-indigo-400 transition-colors line-clamp-1">
-                          {p.zone_name}
-                        </h4>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          {p.district}, <span className="text-slate-300 font-medium">{p.state}</span>
-                        </p>
-                      </div>
-
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider flex-shrink-0 ${isCritical ? 'bg-rose-500 text-white shadow-[0_0_8px_#ef4444]' : isHigh ? 'bg-amber-500 text-white' : status === 'MEDIUM' ? 'bg-yellow-500 text-slate-900' : 'bg-emerald-600 text-white'}`}
-                      >
-                        {status}
+                  {/* Geotechnical Metrics Grid */}
+                  <div className="grid grid-cols-3 gap-2 text-xs pt-2 border-t border-white/10 relative z-10">
+                    <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                      <span className="text-slate-400 block text-[9px] uppercase font-bold tracking-wider">FoS</span>
+                      <span className={`font-mono text-sm font-black ${p.current_fos < 1.0 ? 'text-rose-400' : p.current_fos < 1.3 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                        {p.current_fos}
                       </span>
                     </div>
 
-                    {/* Geotechnical Metrics Grid */}
-                    <div className="grid grid-cols-3 gap-2 text-xs pt-1 border-t border-slate-900">
-                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800/40">
-                        <span className="text-slate-500 block text-[9px] uppercase font-bold">FoS</span>
-                        <span className={`font-mono text-xs font-bold ${p.current_fos < 1.0 ? 'text-rose-400' : p.current_fos < 1.3 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                          {p.current_fos}
-                        </span>
-                      </div>
-
-                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800/40">
-                        <span className="text-slate-500 block text-[9px] uppercase font-bold">Slope</span>
-                        <span className="font-mono text-xs text-slate-200 font-bold">
-                          {p.average_slope_angle}°
-                        </span>
-                      </div>
-
-                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800/40">
-                        <span className="text-slate-500 block text-[9px] uppercase font-bold">Incidents</span>
-                        <span className="font-mono text-xs text-slate-200 font-bold">
-                          {p.historical_incident_count}
-                        </span>
-                      </div>
+                    <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                      <span className="text-slate-400 block text-[9px] uppercase font-bold tracking-wider">Slope</span>
+                      <span className="font-mono text-sm text-white font-black">
+                        {p.average_slope_angle}°
+                      </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-0.5">
-                      <span>Soil: {p.soil_type?.split(' ')[0]}</span>
-                      <span className="text-indigo-400 font-medium group-hover:underline flex items-center space-x-1">
-                        <MapPin size={10} />
-                        <span>Locate on GIS</span>
+                    <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                      <span className="text-slate-400 block text-[9px] uppercase font-bold tracking-wider">Incidents</span>
+                      <span className="font-mono text-sm text-white font-black">
+                        {p.historical_incident_count}
                       </span>
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
-        </aside>
 
-        {/* CENTER: REACT-LEAFLET INTERACTIVE GIS CANVAS */}
-        <main className="flex-1 h-full relative">
-          <LandslideCommandMap
-            zones={zones}
-            infrastructure={infrastructure}
-            sensorNodes={sensorNodes}
-            citizenReports={citizenReports}
-            selectedTarget={selectedTarget}
-            onTriggerAlert={handleTriggerBroadcast}
-          />
-        </main>
-      </div>
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 relative z-10 font-medium">
+                    <span>Soil: {p.soil_type?.split(' ')[0]}</span>
+                    <span className="text-indigo-400 font-bold group-hover:text-indigo-300 flex items-center space-x-1">
+                      <MapPin size={12} />
+                      <span>Locate on GIS</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </aside>
 
       {/* ========================================================================= */}
-      {/* 4. MODALS & DRAWERS */}
+      {/* 5. MODALS & DRAWERS */}
       {/* ========================================================================= */}
       <SimulationDrawer
         isOpen={isSimulationOpen}
