@@ -704,84 +704,69 @@
 <script>window._ZE={"version":{"labels":"v11","fill":"v1","land":"v1","line":"v1","gfs":"v1","icon":"v1","bundle":"0a6769cb"},"config":{"countryCode":"IN","mobile":false,"appURL":"https://play.google.com/store/apps/details?id=com.neave.zoomearth","useMTG":true,"useLog":false},"tiles":{"geocolor":{"min":1787670000,"max":1788534000},"radar":{"min":1788276600,"max":1788536700}},"place":{"isDefault":true,"isMarker":false,"view":"22.21579,78.49044,5"},"strings":{"date":{"days":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"daysShort":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"daysNarrow":["S","M","T","W","T","F","S"],"months":["January","February","March","April","May","June","July","August","September","October","November","December"],"monthsShort":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"daysFormat":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"monthsFormat":["January","February","March","April","May","June","July","August","September","October","November","December"],"monthsShortFormat":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"],"formats":{"monthDay":"{day} {month}","monthDayCompact":"{day} {month}","monthDayShort":"{day} {month}","weekdayDay":"{weekday} {day}","weekdayDayShort":"{weekday} {day}","weekdayDayNarrow":"{weekday} {day}","weekdayMonthDay":"{weekday} {day} {month}","weekdayMonthDayShort":"{weekday} {day} {month}","yearMonthDay":"{day} {month} {year}","time12Hour":"{hour} {dayPeriod}","time12HourMinute":"{hour}:{minute} {dayPeriod}"},"am":"AM","dayExtra":"","midnight":"Midnight","noon":"Noon","pm":"PM","relative":{"latest":"Latest Time","minutesAgo":"{minutes}m ago","minutesFromNow":"In {minutes}m","now":"Now","nowcast":"Nowcast","today":"Today","tomorrow":"Tomorrow","yesterday":"Yesterday"}},"agency":{"jma":"JMA","nasa":"NASA"},"alert":{"loading":"Loading&hellip;"},"button":{"app":"Download App","clear":"Clear All","continue":"Continue","dismiss":"Dismiss","done":"Done","edit":"Edit","ok":"OK","remove":"Remove"},"direction":{"east":"E","north":"N","south":"S","west":"W"},"error":{"retry":"Try Again"},"fire":{"and":"and","complex":"Complex","contained":"contained","control":{"bh":"Being Held","oc":"Out of Control"},"fire":"Fire","fires":"Fires","prescribedBurn":"Prescribed Burn"},"hud":{"favorite":{"add":"Location Saved","remove":"Location Unsaved"},"geolocation":{"approximate":"Approximate Location","removed":"Location Off","success":"Located"},"model":"{model} Forecast Model","overlay":{"clouds":{"off":"Clouds Off","on":"Clouds On"},"coverage":{"off":"Radar Coverage Off","on":"Radar Coverage On"},"crosshair":{"off":"Crosshair Off","on":"Crosshair On"},"fires":{"off":"Active Fires Off","on":"Active Fires On"},"graticule":{"off":"Coordinate Grid Off","on":"Coordinate Grid On"},"heat":{"off":"Heat Spots Off","on":"Heat Spots On"},"heat-fires":{"off":"Heat & Fires Off","on":"Heat & Fires On"},"isolines":{"off":"Pressure Isolines Off","on":"Pressure Isolines On"},"label-values":{"off":"Values Off","on":"Values On"},"labels":{"off":"Labels Off","on":"Labels On"},"lines":{"off":"Border Lines Off","on":"Border Lines On"},"precipitation-animation":{"off":"Rain Animation Off","on":"Rain Animation On"},"radar":{"off":"Radar Off","on":"Radar On"},"storms":{"off":"Tropical Systems Off","on":"Tropical Systems On"},"temperature-values":{"off":"Temperatures Off","on":"Temperatures On"},"terminator":{"off":"Night Boundary Off","on":"Night Boundary On"},"wind-animation":{"off":"Wind Animation Off","on":"Wind Animation On"}},"share":"Share","time":{"summary":{"daily":"Daily Forecast Summary","hourly":"Hourly Forecast Summary"},"timeControl":{"clock":"Clock","timeline":"Timeline"},"timeFormat":{"hour12":"12-Hour Time Format","hour24":"24-Hour Time Format"},"timeZone":{"local":"Local Time Zone","utc":"UTC Time Zone"}},"unit":{"area":{"acres":"acres","hectares":"hectares","imperial":"sq mi","metric":"km\u00b2"},"coordinate":{"decimal":"Decimal","dms":"DMS"},"distance":{"imperial":"mi","metric":"km","nautical":"NM"},"temperature":{"celsius":"Celsius","fahrenheit":"Fahrenheit"},"wind":{"beaufort":"Beaufort scale"},"windDirection":{"compass":"compass","degrees":"degrees"}}},"info":{"beaufort00":"Calm","beaufort01":"Light Air","beaufort02":"Light Breeze","beaufort03":"Gentle Breeze","beaufort04":"Moderate Breeze","beaufort05":"Fresh Breeze","beaufort06":"Strong Breeze","beaufort07":"Near Gale","beaufort08":"Gale","beaufort09":"Strong Gale","beaufort10":"Storm","beaufort11":"Violent Storm","beaufort12":"Hurricane","cityLights":"City Lights","condition":{"clearDay":"Sunny","clearMostlyDay":"Mostly Sunny","clearMostlyNight":"Mostly Clear","clearNight":"Clear Sky","cloudOvercast":"Cloudy","cloudPartlyDay":"Partly Cloudy","cloudPartlyNight":"Partly Cloudy","fog":"Fog / Low Cloud","hail":"Extreme Rain / Hail","noCoverage":"No Radar Data","noPrecipitation":"No Precipitation","rainExtreme":"Extreme Rain","rainHeavy":"Heavy Rain","rainLight":"Light Rain","rainModerate":"Moderate Rain","rainVeryLight":"Very Light Rain","snowHeavy":"Heavy Snow","snowLight":"Light Snow","snowModerate":"Moderate Snow","sunrise":"Sunrise","sunset":"Sunset","sunShower":"Sunshine & Showers"},"dewPoint":{"dry":"Dry","extremelyDry":"Extremely Dry","extremelyHumid":"Extremely Humid","humid":"Humid","slightlyHumid":"Slightly Humid","veryDry":"Very Dry","veryHumid":"Very Humid"},"feelsLike":"Feels {temp}","geolocation":"Your Location","heat":"Heat","noImagery":"No Imagery","notLive":"Not Live","pressure":{"highSymbol":"H","lowSymbol":"L"},"title":{"daily":"Day","date":"Date","hourly":"Hour","rangeMax":"Max","rangeMin":"Min","time":"Time"},"wetBulb":{"extreme":"Extreme Heat Stress","lethal":"Lethal Heat Stress","moderate":"Moderate Heat Stress","none":"No Heat Stress","slight":"Slight Heat Stress","strong":"Strong Heat Stress","veryStrong":"Very Strong Heat Stress"},"windGusts":"Gusts {gust}"},"intro":{"layer":{"dewPoint1":"This map shows how dry or humid the air feels.","dewPoint2":"The dew point is the temperature at which condensation occurs.","humidity":"This map shows the forecast for relative humidity, which&nbsp;compares air moisture to temperature.","precipitation1":"This map shows the forecast for rain, snow, and clouds in the coming days.","precipitation2":"To see live rain, switch to the _radar map_.","precipitationRadarButton":"Switch to Live Rain Radar","pressure1":"This map shows the forecast for atmospheric pressure at sea level.","pressure2":"Low pressure often brings clouds and wind. High&nbsp;pressure usually brings clearer skies and lighter winds.","radar1":"This map shows rain and snow detected by weather radar stations.","radar2":"Radar does not cover all areas. If no data is shown, switch to the _precipitation map_.","satellite1":"This map shows images of the latest weather.","satellite2":"See storms, clouds, fog, smoke, dust, and more, live from space.","satelliteHD1":"This map shows high&#8209;definition satellite imagery.","satelliteHD2":"Detailed images from NASA satellites, updated twice daily since 2000.","temperature":"This map shows the forecast for air temperature at {height} above the ground.","temperatureFeel":"This map shows how temperatures are perceived. Also&nbsp;known as apparent temperature or heat index.","temperatureWetBulb1":"This map shows where people are at risk of heat stress.","temperatureWetBulb2":"Wet-bulb temperatures over {temp} can be dangerous, and prolonged exposure can be lethal.","windGusts":"This map shows the forecast for maximum speeds of sudden bursts of wind near the ground.","windSpeed":"This map shows the forecast for average wind speeds near the ground."},"model":{"detail":"Maximum resolution is {km} km ({mi} miles).","gfs":"GFS is a forecast model run by the U.S. National Centers for Environmental Prediction.","icon":"ICON is a forecast model run by Germany\u2019s weather service DWD."}},"key":{"animation-speed":"A","clouds":"O","coverage":"Q","crosshair":"C","fires":"F","graticule":"G","heat":"H","isolines":"I","label-values":"V","labels":"L","lines":"K","model":"M","precipitation-animation":"P","precipitation-theme":"D","radar":"R","storms":"S","summary":"U","temperature-values":"E","terminator":"N","time-control":"J","time-format":"T","time-zone":"Z","wind-animation":"W"},"layer":{"abbr":{"dew-point":"DP","humidity":"Humidity","precipitation":"Precip.","pressure":"Pressure","temperature":"Temp.","temperature-feel":"Feels","temperature-wet-bulb":"WBT","wind-gusts":"Gusts","wind-speed":"Wind"},"category":{"humidity":"Humidity","satellite":"Satellite","temperature":"Temperature","wind":"Wind"},"dropdown":{"dew-point":"Dew Point","humidity":"Relative Humidity","precipitation":"Precipitation","pressure":"Pressure","radar":"Radar","satellite":"Live Satellite","satellite-hd":"HD Satellite","temperature":"Temperature","temperature-feel":"Feels Like","temperature-wet-bulb":"Wet Bulb","wind-gusts":"Wind Gusts","wind-speed":"Wind Speed"},"full":{"dew-point":"Dew Point Temperature Forecast Map","home":"Weather Map & Hurricane Tracker","humidity":"Relative Humidity Forecast Map","precipitation":"Precipitation Forecast Map | Rain, Snow, Clouds","pressure":"Atmospheric Pressure Forecast Map","radar":"Live Rain Radar Map","satellite":"Weather Satellite & Radar Map","satellite-hd":"HD Weather Satellite Map","temperature":"Temperature Forecast Map","temperature-feel":"\u201cFeels Like\u201d (Heat Index) Temperature Forecast Map","temperature-wet-bulb":"Wet-Bulb Temperature (Heat Stress) Map","wind-gusts":"Wind Gusts Forecast Map","wind-speed":"Wind Speed Forecast Map"},"name":{"dew-point":"Dew Point Temperature Forecast","humidity":"Relative Humidity Forecast","precipitation":"Precipitation Forecast","pressure":"Atmospheric Pressure Forecast","radar":"Live Rain Radar","satellite":"Live Weather Satellite","satellite-hd":"HD Weather Satellite","temperature":"Temperature Forecast","temperature-feel":"\u201cFeels Like\u201d Temperature Forecast","temperature-wet-bulb":"Wet-Bulb Temperature Forecast","wind-gusts":"Wind Gusts Forecast","wind-speed":"Wind Speed Forecast"},"short":{"dew-point":"Dew Point","humidity":"Relative","precipitation":"Precipitation","pressure":"Pressure","radar":"Radar","satellite":"Live","satellite-hd":"HD","temperature":"Actual","temperature-feel":"Feels Like","temperature-wet-bulb":"Wet Bulb","wind-gusts":"Wind Gusts","wind-speed":"Wind Speed"}},"legend":{"rain":{"heavy":"Heavy","light":"Light","moderate":"Moderate","title":"Rain"},"snow":"Snow"},"model":{"name":"{model} Forecast Model","type":{"gfs":"GFS","icon":"ICON"}},"notice":{"graphics":"Graphics error","layerHD":"Switch to _HD Satellite_","layerLive":"Switch to _Live Satellite_","layerRadar":"Use _Radar_ to see live rain","layerRain":"See the _rain forecast_","layerWind":"See the _wind forecast_","maxZoom":"Maximum resolution","model":"Switch to _{model} Model_","offline":"No connection","outage":"Imagery is unavailable. _More info_","slow":"Slow connection","stormSimilar":"Are you looking for {storm}?","update":"New version available _Update Now_"},"outage":{"description":"Imagery from {source} is currently unavailable.","reason":"Normal service should resume soon. Apologies for the inconvenience.","title":"Live Satellite Outage"},"overlay":{"clouds":"Clouds","coverage":"Radar Coverage","crosshair":"Crosshair","fires":"Active Fires","graticule":"Coordinate Grid","heat":"Heat Spots","isolines":"Pressure Isolines","label-values":"Values","labels":"Labels","lines":"Border Lines","precipitation-animation":"Rain Animation","radar":"Radar","storms":"Tropical Systems","temperature-values":"Temperatures","terminator":"Night Boundary","title":"Map Overlays","wind-animation":"Wind Animation"},"punctuation":{"colon":"{text}: ","comma":{"list":", ","sentence":", "},"parenthesis":"({text})","percent":"{pc}%","space":" "},"satellite":{"goes-east":"GOES-East","goes-west":"GOES-West","himawari":"Himawari","msg-iodc":"Meteosat-IODC","msg-zero":"Meteosat","mtg-zero":"Meteosat"},"search":{"coordinates":"Coordinates:","drag":"Drag to Reorder","favorites":"Saved Locations","none":"No results","recent":"Recent Searches"},"settings":{"account":{"login":"Log In"},"animationDuration":{"hours":"{hours} Hours","hudLabel":"Loop Duration"},"animationSpeed":{"fast":"Fast","label":"Animation Speed","medium":"Medium","slow":"Slow"},"animationStyle":{"fast":"Fast","hudLabel":"Animation Style","smooth":"Smooth"},"appearance":{"label":"Appearance","opaque":"Opaque","translucent":"Translucent"},"areaUnit":{"label":"Area"},"coordinateUnit":{"label":"Coordinate System"},"distanceUnit":{"label":"Distance"},"fireAreaUnit":{"label":"Fire Burn Area"},"mapTooltip":{"disabled":"Disabled","enabled":"Enabled","label":"Map Tooltip"},"precipitationTheme":{"dark":"Dark","label":"Precipitation Theme","light":"Light"},"precipitationUnit":{"label":"Precipitation"},"pressureUnit":{"label":"Atmospheric Pressure"},"temperatureUnit":{"label":"Temperature"},"windDirectionUnit":{"label":"Wind Direction"},"windUnit":{"label":"Wind Speed"}},"storm":{"area":"Potential Development Area","chance":{"day2":"{chance} in 2 days","day7":"{chance} in 7 days","development":"Potential for development","high":"high","hours24":"{chance} chance in 24 hours","low":"low","medium":"medium"},"cone":"Cone of Uncertainty","forecast":"Forecast","lastMod":"Last Modified:","liveTitle":"LIVE Tracker, Updates & Forecast","warning-hurricane":"Hurricane Warning","warning-storm":"Tropical Storm Warning","watch-hurricane":"Hurricane Watch","watch-storm":"Tropical Storm Watch","winds":"{wind} winds"},"subscription":{"tierPro":"Pro"},"unit":{"acre":"acre","acres":"acres","acreShort":"ac","beaufort":"Bft","celsius":"\u00b0C","dbz":"dBZ","degree":"\u00b0","fahrenheit":"\u00b0F","feet":"ft","hectare":"hectare","hectares":"hectares","hectareShort":"ha","hpa":"hPa","inh":"in/h","inhg":"inHg","km":"km","km2":"km\u00b2","kmh":"km/h","knot":"knot","knots":"knots","mb":"mb","meters":"m","miles":"mi","miles2":"sq mi","mmh":"mm/h","mmhg":"mmHg","mph":"mph","ms":"m/s","nm":"NM","utc":"UTC"}}};window._ZE.config.timeOffset=1788535680000-new Date().getTime();setTimeout(function(){var s=document.styleSheets;for(var i=s.length;i--;){s[i].disabled=s[i].ownerNode.tagName==='STYLE';}},150);</script>
 <script src="assets/js/app.0a6769cb.js"></script>
 <script>
-  // New Delhi marker pinned to a real geographic location.
-  // Instead of guessing from the (debounced) URL hash, this reads the map's
-  // OWN camera + projection each frame. The map engine is OpenLayers
-  // (Web-Mercator / EPSG:3857). The bundle was patched to expose the live map
-  // instance as window.__zeController.map (see app.0a6769cb.js).
-
-  // New Delhi, [lon, lat]
-  var DELHI = [77.2090, 28.6139];
-
-  // Constants match the app's internal projection (app.js: ie=6378137, ee=ie*PI)
-  var R  = 6378137;           // WGS84 semi-major axis radius
-  var EE = R * Math.PI;       // half world extent in meters (~20037508.34)
-
-  // Forward Web Mercator transform, identical to the app's internal eh():
-  //   x = lon/180 * EE
-  //   y = R * ln( tan( PI * (lat+90) / 360 ) )
-  function mercator(lonLat) {
-      var lon = lonLat[0], lat = lonLat[1];
-      var x = lon / 180 * EE;
-      var y = R * Math.log(Math.tan(Math.PI * (lat + 90) / 360));
-      if (!isFinite(y)) y = (lat >= 0 ? 1 : -1) * EE;
-      return [x, Math.max(Math.min(y, EE), -EE)];
+  function project(lat, lng, zoom) {
+      const TILE_SIZE = 512;
+      const PI = Math.PI;
+      let sinLat = Math.sin(lat * PI / 180);
+      sinLat = Math.max(Math.min(sinLat, 0.9999), -0.9999);
+      const x = TILE_SIZE * (0.5 + lng / 360);
+      const y = TILE_SIZE * (0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * PI));
+      const scale = Math.pow(2, zoom);
+      return { x: x * scale, y: y * scale };
   }
-
-  // Lazily create the marker the first time the map is ready.
-  function ensureMarker() {
-      var m = document.getElementById('custom-delhi-marker');
-      if (!m && document.body) {
-          m = document.createElement('div');
-          m.id = 'custom-delhi-marker';
-          m.style.position = 'absolute';
-          m.style.left = '0px';
-          m.style.top = '0px';
-          m.style.width = '20px';
-          m.style.height = '20px';
-          m.style.background = 'red';
-          m.style.border = '3px solid white';
-          m.style.borderRadius = '50%';
-          m.style.zIndex = '2147483647';
-          m.style.pointerEvents = 'none';
-          m.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-          document.body.appendChild(m);
-      }
-      return m;
-  }
-
-  var _delhi3857 = mercator(DELHI); // compute once
 
   function updateMarker() {
-      var marker = ensureMarker();
-      var controller = window.__zeController;
-
-      if (marker && controller && controller.map) {
-          var map = controller.map;
-          // frameState holds the CURRENT camera: center, resolution, rotation,
-          // size and pixelRatio -> coordinateToPixelTransform. Reading it every
-          // frame keeps the marker glued to Delhi while panning / zooming.
-          if (map.frameState) {
-              var px = map.getPixelFromCoordinate(_delhi3857);
-              if (px) {
-                  marker.style.display = 'block';
-                  // center the 20x20 marker on the projected pixel
-                  marker.style.transform = 'translate3d(' +
-                      (px[0] - 10) + 'px,' + (px[1] - 10) + 'px,0)';
-              }
-          } else {
-              marker.style.display = 'none';
-          }
-      } else if (marker) {
-          marker.style.display = 'none';
+      let hash = "";
+      try {
+          hash = window.location.hash || top.location.hash;
+      } catch (e) {
+          hash = window.location.hash;
       }
+      hash = hash || "#view=22.2,78.4,5"; // Note: no 'z' at the end
+      
+      const match = hash.match(/view=([\-\d\.]+),([\-\d\.]+),([\-\d\.]+)/);
+      
+      let marker = document.getElementById('custom-delhi-marker');
+      if (!marker && document.body) {
+          marker = document.createElement('div');
+          marker.id = 'custom-delhi-marker';
+          marker.style.position = 'absolute';
+          marker.style.width = '20px';
+          marker.style.height = '20px';
+          marker.style.background = 'red';
+          marker.style.border = '3px solid white';
+          marker.style.borderRadius = '50%';
+          marker.style.zIndex = '2147483647';
+          marker.style.transform = 'translate(-50%, -50%)';
+          marker.style.pointerEvents = 'none';
+          marker.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+          document.body.appendChild(marker);
+      }
+      
+      if (match && marker) {
+          const centerLat = parseFloat(match[1]);
+          const centerLng = parseFloat(match[2]);
+          const zoom = parseFloat(match[3]);
 
-      // Keep the 60fps loop running so the marker tracks every camera change.
+          const targetLat = 28.6139; // New Delhi Lat
+          const targetLng = 77.2090; // New Delhi Lng
+
+          const centerPx = project(centerLat, centerLng, zoom);
+          const targetPx = project(targetLat, targetLng, zoom);
+
+          const screenX = (targetPx.x - centerPx.x) + (window.innerWidth / 2);
+          const screenY = (targetPx.y - centerPx.y) + (window.innerHeight / 2);
+
+          marker.style.left = screenX + 'px';
+          marker.style.top = screenY + 'px';
+          marker.style.display = 'block';
+      }
+      
       requestAnimationFrame(updateMarker);
   }
-
-  // Give the app time to boot the OpenLayers map before mounting.
-  setTimeout(updateMarker, 300);
+  
+  // Start the 60fps loop
+  setTimeout(updateMarker, 1000); // Give the app a second to load before mounting
 </script>
 </body>
 </html>
