@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en">
 <head prefix="og: http://ogp.me/ns#">
@@ -44,23 +44,31 @@
 <link as="font" crossorigin="anonymous" href="assets/fonts/museo-sans-cyrl-700.woff2" rel="preload" type="font/woff2"/>
 <link as="font" crossorigin="anonymous" href="assets/fonts/museo-sans-cyrl-900.woff2" rel="preload" type="font/woff2"/>
 <style>
-  /* Shift Zoom Earth native UI inwards to avoid overlapping with MDoNER React Sidebars */
-  
-  /* Left edge UI (Shift right by 400px to clear the Vulnerable Sectors panel) */
-  .layers, .layers-dropdown, .group.overlays, .legend, .panel.layers, .panel.overlays, .notices {
-      margin-left: 400px !important; 
-      z-index: 10 !important;
+  /* Always push the Zoom Earth layer-switcher button group down so it
+     never collides with the React GIS COMMAND chip which sits at ~155px */
+  .group.layers {
+    margin-top: 10px !important;
   }
-  
-  /* Right edge UI (Shift left by 320px to clear the KPI Metrics panel) */
-  .search, .settings, .about, .share, .geolocation, .title, .title-badge, .group.measure, .group.zoom {
-      margin-right: 340px !important;
-      z-index: 10 !important;
+
+  /* Smooth transitions for any programmatic margin shifts */
+  .panel, .group {
+    transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
-  /* Slightly lift the bottom timeline so it isn't cramped */
-  .panel.time {
-      margin-bottom: 20px !important;
+
+  /* When React left sidebar is open, shift Zoom Earth left-side UI right */
+  body.react-left-expanded .panel.layers,
+  body.react-left-expanded .panel.overlays,
+  body.react-left-expanded .notices,
+  body.react-left-expanded .group.overlays {
+    margin-left: 395px !important;
+    z-index: 10 !important;
+  }
+
+  /* When React right sidebar is open, shift Zoom Earth right-side UI left */
+  body.react-right-expanded .group.measure,
+  body.react-right-expanded .group.zoom {
+    margin-right: 280px !important;
+    z-index: 10 !important;
   }
 </style>
 </head>
@@ -633,47 +641,53 @@
 </div>
 </aside>
 <aside class="panel about notranslate">
-<div class="icon"></div><h3>About</h3>
+<div class="icon"></div><h3>MDoNER Live Metrics</h3>
 <button aria-label="Close" class="close"><span></span></button>
-<div class="content">
-<div>
-<header>
-<div class="title-logo">
-<div class="icon"></div>
-<div class="title"></div>
-</div>
-<p><strong>Zoom Earth</strong> is an interactive weather map of the world.</p>
-<p>Explore the current weather and detailed forecasts for your location with stunning, interactive maps showing rain, wind, temperature, pressure, and more.</p>
-<p>With <strong>Zoom Earth</strong> you can track the development of hurricanes and storms, monitor wildfires and smoke, and stay aware of the latest conditions by viewing satellite imagery and rain radar updated in near real time.</p>
-</header>
-<h4 class="app-head">Mobile App</h4>
-<section class="bubble app-links">
-<a href="https://play.google.com/store/apps/details?id=com.neave.zoomearth" rel="nofollow noopener" target="_blank"><img alt="App" class="touch" height="100" loading="lazy" src="assets/images/icon-200.1.jpg" width="100"/></a>
-<a href="/app/" rel="nofollow"><img alt="QR" class="qr" height="145" loading="lazy" src="assets/images/qr-app.svg" width="145"/></a>
-<p class="touch">Download the <a href="https://play.google.com/store/apps/details?id=com.neave.zoomearth" rel="nofollow noopener" target="_blank"><strong>Zoom Earth</strong></a> app!</p>
-<p class="qr"><strong>Scan the QR code</strong> with the camera on your mobile device to get the <strong>Zoom Earth</strong> app.</p>
-<p>Available on the <a href="https://apps.apple.com/in/app/id1531561063" rel="nofollow noopener" target="_blank">App Store</a> for iPhone and iPad, and on <a href="https://play.google.com/store/apps/details?id=com.neave.zoomearth" rel="nofollow noopener" target="_blank">Google Play</a> for Android.</p>
-</section>
-<h4>Data Sources</h4>
-<section class="bubble sources">
-<p><span class="menu-icon precipitation"></span>Weather forecasts are continually updated with the latest global model data from DWD <a href="https://www.dwd.de/EN/research/weatherforecasting/num_modelling/01_num_weather_prediction_modells/icon_description.html" rel="nofollow noopener" target="_blank" title="Icosahedral Nonhydrostatic">ICON</a> and NOAA/NCEP/NWS <a href="https://www.emc.ncep.noaa.gov/emc/pages/numerical_forecast_systems/gfs.php" rel="nofollow noopener" target="_blank" title="Global Forecast System">GFS</a>.</p>
-<p><span class="menu-icon radar"></span>Radar data is processed in real time from many meteorological <a href="https://zoom.earth/legal/radar/" rel="noopener" target="_blank">sources</a> around the world.</p>
-<p><span class="menu-icon satellite"></span>Live satellite imagery is provided by <a href="https://www.nesdis.noaa.gov/our-satellites/currently-flying/geostationary-satellites" rel="nofollow noopener" target="_blank">NOAA GOES</a>, <a href="https://www.eumetsat.int/our-satellites/meteosat-series" rel="nofollow noopener" target="_blank">EUMETSAT Meteosat</a>, and <a href="https://www.jma.go.jp/jma/jma-eng/satellite/index.html" rel="nofollow noopener" target="_blank">JMA Himawari</a> geostationary satellites.</p>
-<p><span class="menu-icon satellite"></span>HD satellite images are updated twice a day from NASA polar-orbiting satellites <a href="https://aqua.nasa.gov/" rel="nofollow noopener" target="_blank">Aqua</a> and <a href="https://terra.nasa.gov/" rel="nofollow noopener" target="_blank">Terra</a>, using services from <a href="https://earthdata.nasa.gov/gibs" rel="nofollow noopener" target="_blank" title="Global Imagery Browse Services">GIBS</a>, part of <a href="https://earthdata.nasa.gov/eosdis" rel="nofollow noopener" target="_blank" title="Earth Observing System Data and Information System">EOSDIS</a>.</p>
-<p><span class="menu-icon storms"></span>Tropical system tracks are generated using the latest data from <a href="https://www.nhc.noaa.gov/" rel="nofollow noopener" target="_blank" title="National Hurricane Center">NHC</a>, <a href="https://www.metoc.navy.mil/jtwc/jtwc.html" rel="nofollow noopener" target="_blank" title="Joint Typhoon Warning Center">JTWC</a>, <a href="https://www.nrlmry.navy.mil/TC.html" rel="nofollow noopener" target="_blank" title="Naval Research Laboratory">NRL</a>, and <a href="https://www.ncdc.noaa.gov/ibtracs/" rel="nofollow noopener" target="_blank" title="International Best Track Archive for Climate Stewardship">IBTrACS</a>.</p>
-<p><span class="menu-icon fires"></span>Active fire incident data is compiled from <a href="https://www.nifc.gov/" rel="nofollow noopener" target="_blank" title="National Interagency Fire Center">NIFC</a>, <a href="https://ciffc.net/" rel="nofollow noopener" target="_blank" title="Canadian Interagency Forest Fire Centre">CIFFC</a>, <a href="https://emergency.copernicus.eu/" rel="nofollow noopener" target="_blank" title="Copernicus Emergency Management Service">CEMS</a>, <a href="https://forest-fire.emergency.copernicus.eu/" rel="nofollow noopener" target="_blank" title="European Forest Fire Information System">EFFIS</a>, <a href="https://www.gdacs.org/" rel="nofollow noopener" target="_blank" title="Global Disaster Alert and Coordination System">GDACS</a>, and other official <a href="https://zoom.earth/legal/fires/" rel="noopener" target="_blank">sources</a> worldwide.</p>
-<p><span class="menu-icon heat"></span>The heat spots overlay shows points of very high temperature detected by satellite. Detections are updated daily, not live, with data from NASA LANCE <a href="https://firms.modaps.eosdis.nasa.gov/" rel="nofollow noopener" target="_blank" title="Fire Information for Resource Management System">FIRMS</a>.</p>
-<p><span class="menu-icon labels"></span>Map labels © <a href="https://www.openstreetmap.org/copyright" rel="nofollow noopener" target="_blank">OpenStreetMap</a> contributors.</p>
-</section>
-<h4>Contact</h4>
-<section class="bubble">
-<p class="link-contact">Please use our <a href="https://zoom.earth/contact/" rel="noopener" target="_blank">contact form</a> to send us your comments, questions, or suggestions.</p>
-</section>
-<footer>
-<p class="copyright">© 2026 Neave Interactive Ltd.</p>
-<p><a href="https://zoom.earth/legal/terms/" rel="noopener" target="_blank">Terms of Service</a></p>
-<p><a href="https://zoom.earth/legal/privacy/" rel="noopener" target="_blank">Privacy Policy</a></p>
-</footer>
+<div class="content" style="padding:0;background:#0f172a;">
+<div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+
+  <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid rgba(99,102,241,0.35);border-radius:12px;padding:12px 14px;">
+    <div style="font-size:9px;font-weight:900;letter-spacing:.12em;color:#a5b4fc;text-transform:uppercase;margin-bottom:4px;">AI-Based Early Warning System</div>
+    <div style="font-size:12px;font-weight:700;color:#fff;">MDoNER GIS Command Center &bull; NER</div>
+    <div style="font-size:9px;color:#818cf8;margin-top:2px;">SIH ID 26001 &bull; SRID 4326</div>
+  </div>
+
+  <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:9px;font-weight:900;letter-spacing:.1em;color:#f87171;text-transform:uppercase;margin-bottom:6px;">Critical Zones (FoS &lt; 1.0)</div>
+      <div id="kpi-critical" style="font-size:30px;font-weight:900;color:#fff;line-height:1;">-</div>
+    </div>
+    <div style="width:40px;height:40px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">&#128293;</div>
+  </div>
+
+  <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:9px;font-weight:900;letter-spacing:.1em;color:#fbbf24;text-transform:uppercase;margin-bottom:6px;">High Risk Sectors</div>
+      <div id="kpi-high" style="font-size:30px;font-weight:900;color:#fff;line-height:1;">-</div>
+    </div>
+    <div style="width:40px;height:40px;background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">&#9888;&#65039;</div>
+  </div>
+
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:9px;font-weight:900;letter-spacing:.1em;color:#94a3b8;text-transform:uppercase;margin-bottom:6px;">Blocked Highways</div>
+      <div id="kpi-roads" style="font-size:30px;font-weight:900;color:#fff;line-height:1;">-</div>
+    </div>
+    <div style="width:40px;height:40px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">&#129517;</div>
+  </div>
+
+  <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:9px;font-weight:900;letter-spacing:.1em;color:#34d399;text-transform:uppercase;margin-bottom:6px;">Active Slope IoT Nodes</div>
+      <div id="kpi-sensors" style="font-size:30px;font-weight:900;color:#34d399;line-height:1;">-</div>
+    </div>
+    <div style="width:40px;height:40px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">&#128225;</div>
+  </div>
+
+  <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:8px 12px;text-align:center;">
+    <div id="kpi-status" style="font-size:10px;color:#475569;font-weight:600;">Awaiting data sync from GIS engine</div>
+  </div>
+
 </div>
 </div>
 </aside>
@@ -827,51 +841,7 @@
 <a class="linkedin" data-template="https://www.linkedin.com/shareArticle?url={url}&amp;title={text}" style="background-color:#0a66c2">LinkedIn</a>
 </div>
 </aside>
-<aside class="panel about notranslate">
-<div class="icon"></div><h3>About</h3>
-<button aria-label="Close" class="close"><span></span></button>
-<div class="content">
-<div>
-<header>
-<div class="title-logo">
-<div class="icon"></div>
-<div class="title"></div>
-</div>
-<p><strong>Zoom Earth</strong> is an interactive weather map of the world.</p>
-<p>Explore the current weather and detailed forecasts for your location with stunning, interactive maps showing rain, wind, temperature, pressure, and more.</p>
-<p>With <strong>Zoom Earth</strong> you can track the development of hurricanes and storms, monitor wildfires and smoke, and stay aware of the latest conditions by viewing satellite imagery and rain radar updated in near real time.</p>
-</header>
-<h4 class="app-head">Mobile App</h4>
-<section class="bubble app-links">
-<a href="https://play.google.com/store/apps/details?id=com.neave.zoomearth" rel="nofollow noopener" target="_blank"><img alt="App" class="touch" height="100" loading="lazy" src="assets/images/icon-200.1.jpg" width="100"/></a>
-<a href="/app/" rel="nofollow"><img alt="QR" class="qr" height="145" loading="lazy" src="assets/images/qr-app.svg" width="145"/></a>
-<p class="touch">Download the <a href="https://play.google.com/store/apps/details?id=com.neave.zoomearth" rel="nofollow noopener" target="_blank"><strong>Zoom Earth</strong></a> app!</p>
-<p class="qr"><strong>Scan the QR code</strong> with the camera on your mobile device to get the <strong>Zoom Earth</strong> app.</p>
-<p>Available on the <a href="https://apps.apple.com/in/app/id1531561063" rel="nofollow noopener" target="_blank">App Store</a> for iPhone and iPad, and on <a href="https://play.google.com/store/apps/details?id=com.neave.zoomearth" rel="nofollow noopener" target="_blank">Google Play</a> for Android.</p>
-</section>
-<h4>Data Sources</h4>
-<section class="bubble sources">
-<p><span class="menu-icon precipitation"></span>Weather forecasts are continually updated with the latest global model data from DWD <a href="https://www.dwd.de/EN/research/weatherforecasting/num_modelling/01_num_weather_prediction_modells/icon_description.html" rel="nofollow noopener" target="_blank" title="Icosahedral Nonhydrostatic">ICON</a> and NOAA/NCEP/NWS <a href="https://www.emc.ncep.noaa.gov/emc/pages/numerical_forecast_systems/gfs.php" rel="nofollow noopener" target="_blank" title="Global Forecast System">GFS</a>.</p>
-<p><span class="menu-icon radar"></span>Radar data is processed in real time from many meteorological <a href="https://zoom.earth/legal/radar/" rel="noopener" target="_blank">sources</a> around the world.</p>
-<p><span class="menu-icon satellite"></span>Live satellite imagery is provided by <a href="https://www.nesdis.noaa.gov/our-satellites/currently-flying/geostationary-satellites" rel="nofollow noopener" target="_blank">NOAA GOES</a>, <a href="https://www.eumetsat.int/our-satellites/meteosat-series" rel="nofollow noopener" target="_blank">EUMETSAT Meteosat</a>, and <a href="https://www.jma.go.jp/jma/jma-eng/satellite/index.html" rel="nofollow noopener" target="_blank">JMA Himawari</a> geostationary satellites.</p>
-<p><span class="menu-icon satellite"></span>HD satellite images are updated twice a day from NASA polar-orbiting satellites <a href="https://aqua.nasa.gov/" rel="nofollow noopener" target="_blank">Aqua</a> and <a href="https://terra.nasa.gov/" rel="nofollow noopener" target="_blank">Terra</a>, using services from <a href="https://earthdata.nasa.gov/gibs" rel="nofollow noopener" target="_blank" title="Global Imagery Browse Services">GIBS</a>, part of <a href="https://earthdata.nasa.gov/eosdis" rel="nofollow noopener" target="_blank" title="Earth Observing System Data and Information System">EOSDIS</a>.</p>
-<p><span class="menu-icon storms"></span>Tropical system tracks are generated using the latest data from <a href="https://www.nhc.noaa.gov/" rel="nofollow noopener" target="_blank" title="National Hurricane Center">NHC</a>, <a href="https://www.metoc.navy.mil/jtwc/jtwc.html" rel="nofollow noopener" target="_blank" title="Joint Typhoon Warning Center">JTWC</a>, <a href="https://www.nrlmry.navy.mil/TC.html" rel="nofollow noopener" target="_blank" title="Naval Research Laboratory">NRL</a>, and <a href="https://www.ncdc.noaa.gov/ibtracs/" rel="nofollow noopener" target="_blank" title="International Best Track Archive for Climate Stewardship">IBTrACS</a>.</p>
-<p><span class="menu-icon fires"></span>Active fire incident data is compiled from <a href="https://www.nifc.gov/" rel="nofollow noopener" target="_blank" title="National Interagency Fire Center">NIFC</a>, <a href="https://ciffc.net/" rel="nofollow noopener" target="_blank" title="Canadian Interagency Forest Fire Centre">CIFFC</a>, <a href="https://emergency.copernicus.eu/" rel="nofollow noopener" target="_blank" title="Copernicus Emergency Management Service">CEMS</a>, <a href="https://forest-fire.emergency.copernicus.eu/" rel="nofollow noopener" target="_blank" title="European Forest Fire Information System">EFFIS</a>, <a href="https://www.gdacs.org/" rel="nofollow noopener" target="_blank" title="Global Disaster Alert and Coordination System">GDACS</a>, and other official <a href="https://zoom.earth/legal/fires/" rel="noopener" target="_blank">sources</a> worldwide.</p>
-<p><span class="menu-icon heat"></span>The heat spots overlay shows points of very high temperature detected by satellite. Detections are updated daily, not live, with data from NASA LANCE <a href="https://firms.modaps.eosdis.nasa.gov/" rel="nofollow noopener" target="_blank" title="Fire Information for Resource Management System">FIRMS</a>.</p>
-<p><span class="menu-icon labels"></span>Map labels © <a href="https://www.openstreetmap.org/copyright" rel="nofollow noopener" target="_blank">OpenStreetMap</a> contributors.</p>
-</section>
-<h4>Contact</h4>
-<section class="bubble">
-<p class="link-contact">Please use our <a href="https://zoom.earth/contact/" rel="noopener" target="_blank">contact form</a> to send us your comments, questions, or suggestions.</p>
-</section>
-<footer>
-<p class="copyright">© 2026 Neave Interactive Ltd.</p>
-<p><a href="https://zoom.earth/legal/terms/" rel="noopener" target="_blank">Terms of Service</a></p>
-<p><a href="https://zoom.earth/legal/privacy/" rel="noopener" target="_blank">Privacy Policy</a></p>
-</footer>
-</div>
-</div>
-</aside>
+
 <div class="dialogs"></div>
 <footer class="attribution"></footer>
 <aside class="hud">

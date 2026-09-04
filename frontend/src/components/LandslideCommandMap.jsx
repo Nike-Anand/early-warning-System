@@ -1,5 +1,54 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ShieldAlert, Camera, Wifi } from 'lucide-react';
+
+// Collapsible map legend — extracted as its own component to honour Rules of Hooks
+function MapLegend() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="absolute bottom-16 left-6 z-[1000] pointer-events-auto">
+      {/* Toggle chip */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center space-x-2 bg-black/70 hover:bg-black/90 backdrop-blur-xl px-3 py-2 rounded-2xl border border-white/10 shadow-2xl transition-all"
+      >
+        <ShieldAlert size={14} className="text-indigo-400 flex-shrink-0" />
+        <span className="text-[10px] font-bold text-slate-200 uppercase tracking-widest">Map Legend</span>
+        <span className="text-slate-400 text-[10px]">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {/* Expandable panel — pops upward */}
+      {open && (
+        <div className="absolute bottom-full mb-2 left-0 bg-black/75 backdrop-blur-xl p-3.5 rounded-2xl border border-white/10 shadow-2xl text-xs space-y-2 w-[200px]">
+          <div className="font-bold text-slate-200 uppercase tracking-widest text-[10px] flex items-center justify-between">
+            <span>Command Map Layer</span>
+            <ShieldAlert size={13} className="text-indigo-400" />
+          </div>
+          <div className="space-y-2 text-[11px] pt-1">
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-red-600 shadow-[0_0_8px_#ef4444] border-2 border-white flex-shrink-0"></span>
+              <span className="text-slate-200 font-medium">Verification (Delhi)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-amber-500 border border-white/50 flex items-center justify-center flex-shrink-0"><Wifi size={8} className="text-white"/></span>
+              <span className="text-slate-200 font-medium">IoT Sensor Node</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-indigo-500 border border-white/50 flex items-center justify-center flex-shrink-0"><Camera size={8} className="text-white"/></span>
+              <span className="text-slate-200 font-medium">Citizen Report</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-red-500/40 border border-red-500 flex-shrink-0"></div>
+              <span className="text-slate-200 font-medium">Critical Zone</span>
+            </div>
+            <div className="text-[9px] text-slate-400 text-center uppercase font-bold tracking-widest mt-2 border-t border-white/10 pt-2">
+              Zoom Earth HD Satellite Engine
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // OpenLayers Web Mercator Projection Math
 const R = 6378137;
@@ -150,6 +199,7 @@ export default function LandslideCommandMap({
       {/* Zoom Earth Core Engine */}
       <iframe
         ref={iframeRef}
+        id="ze-iframe"
         sandbox="allow-scripts allow-same-origin"
         src="/zoom_earth/index.html"
         className="w-full h-full border-0 absolute top-0 left-0"
@@ -235,34 +285,8 @@ export default function LandslideCommandMap({
         </div>
       ))}
 
-      {/* Map Legend Overlay */}
-      <div className="absolute bottom-6 left-6 z-[1000] bg-black/60 backdrop-blur-xl p-3.5 rounded-2xl border border-white/10 shadow-2xl text-xs space-y-2 max-w-[220px] pointer-events-none">
-        <div className="font-bold text-slate-200 uppercase tracking-widest text-[10px] flex items-center justify-between drop-shadow-sm">
-          <span>Command Map Layer</span>
-          <ShieldAlert size={14} className="text-indigo-400" />
-        </div>
-        <div className="space-y-2 text-[11px] pt-1">
-          <div className="flex items-center space-x-2">
-            <span className="w-3 h-3 rounded-full bg-red-600 shadow-[0_0_8px_#ef4444] border-2 border-white"></span>
-            <span className="text-slate-200 font-medium drop-shadow-sm">Verification (Delhi)</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-3 h-3 rounded-full bg-amber-500 border border-white/50 flex items-center justify-center"><Wifi size={8} className="text-white"/></span>
-            <span className="text-slate-200 font-medium drop-shadow-sm">IoT Sensor Node</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-3 h-3 rounded-full bg-indigo-500 border border-white/50 flex items-center justify-center"><Camera size={8} className="text-white"/></span>
-            <span className="text-slate-200 font-medium drop-shadow-sm">Citizen Report</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-red-500/40 border border-red-500"></div>
-            <span className="text-slate-200 font-medium drop-shadow-sm">Critical Zone</span>
-          </div>
-          <div className="text-[9px] text-slate-400 text-center uppercase font-bold tracking-widest mt-2 border-t border-white/10 pt-2">
-            Zoom Earth HD Satellite Engine
-          </div>
-        </div>
-      </div>
+      {/* Map Legend Overlay — Collapsible */}
+      <MapLegend />
     </div>
   );
 }

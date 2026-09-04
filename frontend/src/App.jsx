@@ -51,8 +51,22 @@ export default function App() {
   const [isKpiOpen, setIsKpiOpen] = useState(true);
 
   // --- COLLAPSE/EXPAND STATE ---
-  const [isLeftExpanded, setIsLeftExpanded] = useState(true);
-  const [isRightExpanded, setIsRightExpanded] = useState(true);
+  const [isLeftExpanded, setIsLeftExpanded] = useState(false);
+  const [isRightExpanded, setIsRightExpanded] = useState(false);
+
+  const toggleLeft = () => {
+    setIsLeftExpanded((prev) => {
+      if (!prev) setIsRightExpanded(false);
+      return !prev;
+    });
+  };
+
+  const toggleRight = () => {
+    setIsRightExpanded((prev) => {
+      if (!prev) setIsLeftExpanded(false);
+      return !prev;
+    });
+  };
 
   // --- DATA FETCHING ---
   const [isLoading, setIsLoading] = useState(true);
@@ -124,6 +138,36 @@ export default function App() {
 
   // Live IST clock
   const [liveTime, setLiveTime] = useState('');
+
+  useEffect(() => {
+    // This allows React to control CSS classes inside the Zoom Earth iframe natively.
+    // It shifts the Zoom Earth dropdown panels out of the way when the React sidebars expand.
+    const iframe = document.getElementById('ze-iframe');
+    if (!iframe) return;
+
+    const syncIframeClasses = () => {
+      try {
+        const doc = iframe.contentDocument;
+        if (doc && doc.body) {
+          if (isLeftExpanded) doc.body.classList.add('react-left-expanded');
+          else doc.body.classList.remove('react-left-expanded');
+          
+          if (isRightExpanded) doc.body.classList.add('react-right-expanded');
+          else doc.body.classList.remove('react-right-expanded');
+        }
+      } catch (e) {
+        console.warn("Could not sync classes to iframe body", e);
+      }
+    };
+
+    // Run immediately
+    syncIframeClasses();
+    
+    // Also run on load in case the iframe hasn't loaded yet
+    iframe.addEventListener('load', syncIframeClasses);
+    return () => iframe.removeEventListener('load', syncIframeClasses);
+  }, [isLeftExpanded, isRightExpanded]);
+
   useEffect(() => {
     const tick = () => {
       const now = new Date();
@@ -270,6 +314,27 @@ export default function App() {
     return { criticalZones, highZones, blockedRoads, totalSensors };
   }, [zones, infrastructure, sensorNodes]);
 
+  // Push live KPI values into the Zoom Earth About (MDoNER Metrics) panel
+  useEffect(() => {
+    const iframe = document.getElementById('ze-iframe');
+    if (!iframe) return;
+    const pushKpis = () => {
+      try {
+        const doc = iframe.contentDocument;
+        if (!doc) return;
+        const set = (id, val) => { const el = doc.getElementById(id); if (el) el.textContent = val; };
+        set('kpi-critical', kpis.criticalZones);
+        set('kpi-high', kpis.highZones);
+        set('kpi-roads', kpis.blockedRoads);
+        set('kpi-sensors', kpis.totalSensors);
+        set('kpi-status', `Last synced: ${new Date().toLocaleTimeString('en-IN', { hour12: false })} IST`);
+      } catch (e) { /* cross-origin guard */ }
+    };
+    pushKpis();
+    iframe.addEventListener('load', pushKpis);
+    return () => iframe.removeEventListener('load', pushKpis);
+  }, [kpis]);
+
   // --- FILTERED ZONE STREAM ---
   const filteredZones = useMemo(() => {
     return zones.filter((z) => {
@@ -397,14 +462,6 @@ export default function App() {
           </button>
 
           <button
-            onClick={() => setIsKpiOpen(!isKpiOpen)}
-            className={`px-3 py-1.5 backdrop-blur-md border border-white/10 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-md ${isKpiOpen ? 'bg-indigo-900/60 text-white border-indigo-500/50 hover:bg-indigo-800/60' : 'bg-black/40 hover:bg-black/60 text-slate-200'}`}
-          >
-            <Activity size={14} className={isKpiOpen ? 'text-indigo-400' : 'text-fuchsia-400'} />
-            <span>Metrics</span>
-          </button>
-
-          <button
             onClick={fetchData}
             title="Refresh Central GIS Datasets"
             className="p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-xl text-slate-300 hover:text-white border border-white/10 transition-colors shadow-md"
@@ -439,86 +496,11 @@ export default function App() {
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* 3. FLOATING KPI METRICS (RIGHT SIDE) */}
-      {/* ========================================================================= */}
-      {isKpiOpen && (
-        <div className={`absolute top-24 right-5 w-64 z-10 pointer-events-none transition-all duration-300 ${isRightExpanded ? 'space-y-3' : ''}`}>
-          
-          {/* Header Toggle */}
-          <div className="pointer-events-auto flex justify-end mb-2">
-            <button 
-              onClick={() => setIsRightExpanded(!isRightExpanded)}
-              className="bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/10 text-white rounded-full p-1.5 shadow-lg transition-colors flex items-center space-x-1"
-            >
-              {isRightExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              {!isRightExpanded && <span className="text-[10px] pr-2 font-bold uppercase tracking-widest text-slate-300">Metrics ({kpis.criticalZones + kpis.highZones} Alerts)</span>}
-            </button>
-          </div>
-
-          {/* Body */}
-          {isRightExpanded && (
-            <>
-              {/* KPI 1: Critical Failures */}
-              <div className="bg-slate-950/50 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex items-center justify-between shadow-2xl pointer-events-auto hover:bg-slate-950/70 transition-colors">
-                <div>
-                  <span className="text-[9px] font-bold text-rose-400 uppercase tracking-widest block drop-shadow-md">
-                    Critical Zones (FoS &lt; 1.0)
-                  </span>
-                  <div className="text-xl font-black text-white mt-0.5 drop-shadow-lg">{kpis.criticalZones}</div>
-                </div>
-                <div className="p-2 bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
-                  <Flame size={18} />
-                </div>
-              </div>
-
-          {/* KPI 2: High Risk Corridors */}
-          <div className="bg-slate-950/50 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex items-center justify-between shadow-2xl pointer-events-auto hover:bg-slate-950/70 transition-colors">
-            <div>
-              <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest block drop-shadow-md">
-                High Risk Sectors
-              </span>
-              <div className="text-xl font-black text-white mt-0.5 drop-shadow-lg">{kpis.highZones}</div>
-            </div>
-            <div className="p-2 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-              <AlertTriangle size={18} />
-            </div>
-          </div>
-
-          {/* KPI 3: Blocked Highways */}
-          <div className="bg-slate-950/50 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex items-center justify-between shadow-2xl pointer-events-auto hover:bg-slate-950/70 transition-colors">
-            <div>
-              <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block drop-shadow-md">
-                Blocked Highways
-              </span>
-              <div className="text-xl font-black text-white mt-0.5 drop-shadow-lg">{kpis.blockedRoads}</div>
-            </div>
-            <div className="p-2 bg-white/5 text-rose-400 rounded-xl border border-white/10">
-              <Compass size={18} />
-            </div>
-          </div>
-
-              {/* KPI 4: Online Telemetry Hardware */}
-              <div className="bg-slate-950/50 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex items-center justify-between shadow-2xl pointer-events-auto hover:bg-slate-950/70 transition-colors">
-                <div>
-                  <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block drop-shadow-md">
-                    Active Slope IoT Nodes
-                  </span>
-                  <div className="text-xl font-black text-emerald-400 mt-0.5 drop-shadow-lg">{kpis.totalSensors}</div>
-                </div>
-                <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-                  <Radio size={18} />
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* 4. FLOATING LEFT SIDEBAR: SEARCH & LIVE HAZARD STREAM */}
       {/* ========================================================================= */}
-      <aside className={`absolute left-5 top-24 bg-slate-950/50 backdrop-blur-2xl border border-white/10 rounded-3xl flex flex-col shadow-[0_0_40px_rgba(0,0,0,0.5)] z-10 overflow-hidden pointer-events-auto transition-all duration-300 ${isLeftExpanded ? 'w-[380px] bottom-8' : 'w-[200px] bottom-auto'}`}>
+      <aside className={`absolute bg-slate-950/50 backdrop-blur-2xl border border-white/10 rounded-3xl flex flex-col shadow-[0_0_40px_rgba(0,0,0,0.5)] z-20 overflow-hidden pointer-events-auto transition-all duration-300 ${isLeftExpanded ? 'left-5 top-[70px] w-[380px] bottom-8' : 'left-[220px] top-[70px] w-auto bottom-auto'}`}>
         
         {/* Toggle Header */}
         <div className="flex items-center justify-between p-3 border-b border-white/10 bg-black/20">
@@ -527,7 +509,7 @@ export default function App() {
             <span className="text-[11px] font-black uppercase tracking-widest text-slate-200">GIS Command</span>
           </div>
           <button 
-            onClick={() => setIsLeftExpanded(!isLeftExpanded)}
+            onClick={toggleLeft}
             className="p-1 hover:bg-white/10 rounded-full transition-colors text-slate-300 hover:text-white"
           >
             {isLeftExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
