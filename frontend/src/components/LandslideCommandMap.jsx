@@ -244,6 +244,7 @@ export default function LandslideCommandMap({
   infrastructure = [],
   sensorNodes = [],
   citizenReports = [],
+  resources = [],
   selectedTarget = null,
   onTriggerAlert = () => {},
   t = (key) => key
