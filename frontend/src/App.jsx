@@ -31,6 +31,7 @@ import FieldReportingModal from './components/FieldReportingModal';
 import EmergencyResourcesModal from './components/EmergencyResourcesModal';
 import { registerBackgroundSync, syncOfflineReports } from './utils/indexedDbSync';
 import { translations, languageOptions } from './translations/translations';
+import { supabase } from './utils/supabase';
 
 export default function App() {
   // --- CORE STATE ---
@@ -110,11 +111,16 @@ const changeLanguage = (lang) => {
         setInfrastructure(infraData.features || []);
       }
 
-      // 3. Fetch Citizen Reports
-      const reportsRes = await fetch('/api/v1/reports');
-      if (reportsRes.ok) {
-        const reportsData = await reportsRes.json();
-        setCitizenReports(reportsData.reports || []);
+      // 3. Fetch Citizen Reports from Supabase
+      try {
+        let { data: sbReports, error } = await supabase.from('Field_reports').select('*').order('created_at', { ascending: false });
+        if (error) {
+          const { data: lowerCaseReports } = await supabase.from('field_reports').select('*').order('created_at', { ascending: false });
+          sbReports = lowerCaseReports;
+        }
+        setCitizenReports(sbReports || []);
+      } catch (err) {
+        console.warn('Supabase fetch failed', err);
       }
     } catch (err) {
       console.warn("Backend fetch failed, relying on mock/fallback state:", err);
@@ -224,6 +230,25 @@ const changeLanguage = (lang) => {
     syncOfflineReports().then((r) => {
       if (r.syncedCount > 0) fetchData();
     });
+
+    // Listen for realtime changes from Supabase
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'Field_reports' },
+        (payload) => setCitizenReports((prev) => [payload.new, ...prev])
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'field_reports' },
+        (payload) => setCitizenReports((prev) => [payload.new, ...prev])
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchData]);
 
   // --- WEBSOCKET LIVE STREAM & SIREN BROADCAST ---

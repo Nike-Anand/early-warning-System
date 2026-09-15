@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { ShieldAlert, Camera, Wifi } from 'lucide-react';
 
 // Collapsible map legend — extracted as its own component to honour Rules of Hooks
@@ -216,6 +216,29 @@ const getRiskColor = (status, alpha = 1.0) => {
   }
 };
 
+// Approximate centre of a zone polygon (average of the outer ring vertices)
+function getCentroid(geometry) {
+  const coords = geometry?.coordinates;
+  if (!coords) return null;
+  let pts;
+  if (geometry?.type === 'Polygon') pts = coords[0];
+  else if (geometry?.type === 'MultiPolygon') pts = coords[0]?.[0];
+  else return null;
+  if (!pts || !pts.length) return null;
+  let sumLon = 0;
+  let sumLat = 0;
+  pts.forEach(([lon, lat]) => { sumLon += lon; sumLat += lat; });
+  return { lng: sumLon / pts.length, lat: sumLat / pts.length };
+}
+
+// Approximate middle vertex of a road / line feature
+function getLineMidpoint(geometry) {
+  const coords = geometry?.coordinates;
+  if (!coords || !coords.length) return null;
+  const mid = coords[Math.floor(coords.length / 2)] || coords[0];
+  return { lng: mid[0], lat: mid[1] };
+}
+
 export default function LandslideCommandMap({
   zones = [],
   infrastructure = [],
@@ -230,27 +253,42 @@ export default function LandslideCommandMap({
   const rafRef = useRef(null);
   const debugLogged = useRef(false);
 
-  // Handle Map Panning
-  useEffect(() => {
-    if (selectedTarget && iframeRef.current) {
-      try {
-        const cw = iframeRef.current.contentWindow;
-        if (cw && cw.__zeController && cw.__zeController.map) {
-          const map = cw.__zeController.map;
-          if (map.getView) {
-            const view = map.getView();
-            view.animate({
-              center: mercator([selectedTarget.lng, selectedTarget.lat]),
-              zoom: selectedTarget.zoom || 11,
-              duration: 1200
-            });
-          }
+  // Currently selected feature highlight (zone / road / node / report / external point)
+  const [selected, setSelected] = useState(null);
+
+  // Fly the OpenLayers camera to a lon/lat (the map uses Web Mercator)
+  const flyTo = useCallback((lng, lat, zoom = 11) => {
+    if (!iframeRef.current) return;
+    try {
+      const cw = iframeRef.current.contentWindow;
+      if (cw && cw.__zeController && cw.__zeController.map) {
+        const map = cw.__zeController.map;
+        if (map.getView) {
+          map.getView().animate({
+            center: mercator([lng, lat]),
+            zoom,
+            duration: 1200
+          });
         }
-      } catch (e) {
-        // Ignore cross-origin error
       }
+    } catch (e) {
+      // Ignore cross-origin error
     }
-  }, [selectedTarget]);
+  }, []);
+
+  // Select a feature and fly to it (used by map clicks)
+  const handleSelect = useCallback(({ type, id, lng, lat, zoom = 11 }) => {
+    setSelected({ type, id, lng, lat });
+    flyTo(lng, lat, zoom);
+  }, [flyTo]);
+
+  // Handle Map Panning from external sources (sidebar cards, assets "Locate", citizen feed)
+  useEffect(() => {
+    if (selectedTarget) {
+      setSelected({ type: 'external', id: null, lng: selectedTarget.lng, lat: selectedTarget.lat });
+      flyTo(selectedTarget.lng, selectedTarget.lat, selectedTarget.zoom || 11);
+    }
+  }, [selectedTarget, flyTo]);
 
   useEffect(() => {
     // 60fps Application-Level Bridge to the Zoom Earth Map Engine
@@ -371,11 +409,14 @@ export default function LandslideCommandMap({
             data-coords={JSON.stringify(zone.geometry?.coordinates || [])}
             data-type={zone.geometry?.type}
             fill={getRiskColor(zone.properties?.current_risk_status, 0.45)}
-            stroke={getRiskColor(zone.properties?.current_risk_status, 1.0)}
-            strokeWidth="2"
+            stroke={selected?.type === 'zone' && selected.id === zone.properties?.zone_id ? '#ffffff' : getRiskColor(zone.properties?.current_risk_status, 1.0)}
+            strokeWidth={selected?.type === 'zone' && selected.id === zone.properties?.zone_id ? 4 : 2}
             onMouseEnter={(e) => e.target.style.stroke = '#fff'}
-            onMouseLeave={(e) => e.target.style.stroke = getRiskColor(zone.properties?.current_risk_status, 1.0)}
-            onClick={() => onTriggerAlert(zone.properties)}
+            onMouseLeave={(e) => e.target.style.stroke = selected?.type === 'zone' && selected.id === zone.properties?.zone_id ? '#ffffff' : getRiskColor(zone.properties?.current_risk_status, 1.0)}
+            onClick={() => {
+              const c = getCentroid(zone.geometry);
+              if (c) handleSelect({ type: 'zone', id: zone.properties?.zone_id, lng: c.lng, lat: c.lat, zoom: 11 });
+            }}
           >
             <title>{zone.properties?.zone_name} - {zone.properties?.current_risk_status}</title>
           </path>
@@ -387,9 +428,13 @@ export default function LandslideCommandMap({
             data-coords={JSON.stringify(infra.geometry?.coordinates || [])}
             data-type={infra.geometry?.type}
             fill="none"
-            stroke={infra.properties?.current_status === 'blocked' ? '#ef4444' : '#3b82f6'}
-            strokeWidth="3"
+            stroke={selected?.type === 'infra' && selected.id === infra.properties?.element_id ? '#ffffff' : (infra.properties?.current_status === 'blocked' ? '#ef4444' : '#3b82f6')}
+            strokeWidth={selected?.type === 'infra' && selected.id === infra.properties?.element_id ? 5 : 3}
             strokeDasharray={infra.properties?.current_status === 'blocked' ? '6,6' : 'none'}
+            onClick={() => {
+              const c = getLineMidpoint(infra.geometry);
+              if (c) handleSelect({ type: 'infra', id: infra.properties?.element_id, lng: c.lng, lat: c.lat, zoom: 11 });
+            }}
           >
             <title>{infra.properties?.name} ({infra.properties?.current_status})</title>
           </path>
@@ -415,6 +460,7 @@ export default function LandslideCommandMap({
           data-lon={node.lon || 91.88}
           data-lat={node.lat || 25.75}
           title={node.node_name || node.node_code}
+          onClick={() => handleSelect({ type: 'node', id: node.node_id || node.node_code, lng: node.lon || 91.88, lat: node.lat || 25.75, zoom: 11 })}
         >
           <Wifi size={12} className="text-white" />
         </div>
@@ -428,10 +474,24 @@ export default function LandslideCommandMap({
           data-lon={report.lng || report.lon}
           data-lat={report.lat}
           title={report.hazard_type || 'Citizen Report'}
+          onClick={() => handleSelect({ type: 'report', id: report.report_id || report.id, lng: report.lng || report.lon, lat: report.lat, zoom: 11 })}
         >
           <Camera size={12} className="text-white" />
         </div>
       ))}
+
+      {/* Selected Location Highlight Marker */}
+      {selected && (
+        <div
+          className="ze-marker absolute flex items-center justify-center pointer-events-none z-[60] hidden"
+          data-lon={selected.lng}
+          data-lat={selected.lat}
+          title="Selected location"
+        >
+          <div className="absolute w-6 h-6 rounded-full bg-white/40 border-2 border-white animate-ping"></div>
+          <div className="w-3 h-3 rounded-full bg-white border-2 border-black shadow-[0_0_10px_rgba(255,255,255,0.9)]"></div>
+        </div>
+      )}
 
       {/* Map Legend Overlay — Collapsible */}
     <MapLegend t={t} />
