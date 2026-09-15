@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CloudRain, Play, RotateCcw, AlertOctagon, TrendingDown, CheckCircle2, ChevronRight } from 'lucide-react';
 
-export default function SimulationDrawer({ isOpen, onClose, onRunSimulation }) {
+export default function SimulationDrawer({ isOpen, onClose, onRunSimulation, t = (key) => key }) {
   const [rainDelta, setRainDelta] = useState(30); // mm/hr added
   const [duration, setDuration] = useState(12);   // hours
   const [poreMultiplier, setPoreMultiplier] = useState(2.2);
@@ -50,8 +50,8 @@ export default function SimulationDrawer({ isOpen, onClose, onRunSimulation }) {
             <CloudRain size={20} />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-slate-100">"What-If" Climate Simulator</h3>
-            <p className="text-[11px] text-slate-400">Stress-test NER slopes under heavy downpours</p>
+            <h3 className="font-bold text-sm text-slate-100">{t('what_if_simulator')}</h3>
+            <p className="text-[11px] text-slate-400">{t('simulator_description')}</p>
           </div>
         </div>
         <button
@@ -67,7 +67,7 @@ export default function SimulationDrawer({ isOpen, onClose, onRunSimulation }) {
         {/* Slider 1: Rainfall Intensity Delta */}
         <div className="space-y-2">
           <div className="flex justify-between text-xs">
-            <span className="text-slate-300 font-medium">Excess Rainfall Intensity:</span>
+            <span className="text-slate-300 font-medium">{t('excess_rainfall')}</span>
             <b className="text-indigo-400 font-mono">+{rainDelta} mm/hr</b>
           </div>
           <input
@@ -80,16 +80,16 @@ export default function SimulationDrawer({ isOpen, onClose, onRunSimulation }) {
             className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
           />
           <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-            <span>+0 mm/hr (Dry)</span>
-            <span>+40 mm/hr (Heavy)</span>
-            <span>+80 mm/hr (Cloudburst)</span>
+            <span>{t('dry_rainfall')}</span>
+            <span>{t('heavy_rainfall_level')}</span>
+            <span>{t('cloudburst')}</span>
           </div>
         </div>
 
         {/* Slider 2: Duration */}
         <div className="space-y-2">
           <div className="flex justify-between text-xs">
-            <span className="text-slate-300 font-medium">Downpour Continuous Duration:</span>
+            <span className="text-slate-300 font-medium">{t('downpour_duration')}</span>
             <b className="text-indigo-400 font-mono">{duration} Hours</b>
           </div>
           <input
@@ -102,16 +102,16 @@ export default function SimulationDrawer({ isOpen, onClose, onRunSimulation }) {
             className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
           />
           <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-            <span>1 hr (Flash)</span>
-            <span>24 hrs (Full Day)</span>
-            <span>48 hrs (Prolonged)</span>
+            <span>{t('flash_duration')}</span>
+            <span>{t('full_day_duration')}</span>
+            <span>{t('prolonged_duration')}</span>
           </div>
         </div>
 
         {/* Slider 3: Groundwater Pore Pressure */}
         <div className="space-y-2">
           <div className="flex justify-between text-xs">
-            <span className="text-slate-300 font-medium">Pore Water Pressure Spike:</span>
+            <span className="text-slate-300 font-medium">{t('pore_pressure_spike')}</span>
             <b className="text-amber-400 font-mono">{poreMultiplier}x</b>
           </div>
           <input
@@ -124,9 +124,9 @@ export default function SimulationDrawer({ isOpen, onClose, onRunSimulation }) {
             className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
           />
           <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-            <span>1.0x (Normal)</span>
-            <span>2.5x (High Saturation)</span>
-            <span>4.0x (Severe Hydrostatic)</span>
+            <span>{t('normal_pressure')}</span>
+            <span>{t('high_saturation')}</span>
+            <span>{t('severe_hydrostatic')}</span>
           </div>
         </div>
 
@@ -138,7 +138,7 @@ export default function SimulationDrawer({ isOpen, onClose, onRunSimulation }) {
             className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-indigo-600/30"
           >
             <Play size={14} />
-            <span>{loading ? 'Executing Physics Engine...' : 'Run Simulation'}</span>
+            <span>{loading ? t('executing_physics') : t('run_simulation')}</span>
           </button>
           <button
             onClick={handleReset}
@@ -152,9 +152,9 @@ export default function SimulationDrawer({ isOpen, onClose, onRunSimulation }) {
         {simulationResults && (
           <div className="space-y-3 pt-3 border-t border-slate-800">
             <div className="flex items-center justify-between text-xs font-bold text-slate-200">
-              <span>Simulation Diagnostics</span>
+              <span>{t('simulation_diagnostics')}</span>
               <span className="px-2 py-0.5 bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded text-[10px]">
-                {simulationResults.escalated_zones_count} Zones Escalated
+                {simulationResults.escalated_zones_count} {t('zones_escalated')}
               </span>
             </div>
 
@@ -171,8 +171,8 @@ export default function SimulationDrawer({ isOpen, onClose, onRunSimulation }) {
                     </span>
                   </div>
                   <div className="flex justify-between text-[11px] font-mono">
-                    <span className="text-slate-400">Baseline FoS: <b className="text-slate-300">{res.baseline_fos}</b></span>
-                    <span className="text-rose-400">Simulated FoS: <b>{res.simulated_fos}</b></span>
+                    <span className="text-slate-400">{t('baseline_fos')}: <b className="text-slate-300">{res.baseline_fos}</b></span>
+                    <span className="text-rose-400">{t('simulated_fos')}: <b>{res.simulated_fos}</b></span>
                   </div>
                   <p className="text-[10px] text-slate-400 leading-snug">{res.diagnosis}</p>
                 </div>

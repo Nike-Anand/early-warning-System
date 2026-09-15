@@ -87,7 +87,7 @@ class MQTTTelemetryWorker:
             # Extract routing parameters straight out of structural channel context strings:
             # Topic format: mdoner/ner/sensor/{node_id}/telemetry
             extracted_node_id = topic_parts[3] if len(topic_parts) >= 4 else "UNKNOWN"
-            raw_payload = msg.payload.decode('utf-8')
+            raw_payload = msg.payload.decode('utf-8-sig').strip()
             logger.info(f"Inbound MQTT Packet caught on [Topic: {msg.topic}]")
             
             data = json.loads(raw_payload)

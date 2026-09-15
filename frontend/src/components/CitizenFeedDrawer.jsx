@@ -6,7 +6,8 @@ export default function CitizenFeedDrawer({
   onClose,
   reports = [],
   onVerifyReport = () => {},
-  onSelectLocation = () => {}
+  onSelectLocation = () => {},
+   t = (key) => key
 }) {
   const [filter, setFilter] = useState('ALL');
 
@@ -27,8 +28,8 @@ export default function CitizenFeedDrawer({
             <Camera size={20} />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-slate-100">Citizen Crowdsourced Feed</h3>
-            <p className="text-[11px] text-slate-400">Real-time ground reports from villagers & commuters</p>
+            <h3 className="font-bold text-sm text-slate-100">→ {t('citizen_crowdsourced_feed')}</h3>
+            <p className="text-[11px] text-slate-400">→ {t('realtime_ground_reports')}</p>
           </div>
         </div>
         <button
@@ -56,7 +57,8 @@ export default function CitizenFeedDrawer({
       <div className="p-4 space-y-3.5 flex-1 overflow-y-auto custom-scrollbar">
         {filteredReports.length === 0 ? (
           <div className="text-center py-12 text-slate-500 text-xs">
-            No citizen reports matching selected filter.
+            → {t('no_matching_reports')}
+
           </div>
         ) : (
           filteredReports.map((report) => {
@@ -104,7 +106,7 @@ export default function CitizenFeedDrawer({
                       className="absolute bottom-1.5 right-1.5 p-1 bg-black/60 hover:bg-black text-white rounded text-[10px] flex items-center space-x-1 backdrop-blur-sm"
                     >
                       <ExternalLink size={10} />
-                      <span>Full Photo</span>
+                      <span>→ {t('full_photo')}</span>
                     </a>
                   </div>
                 )}
@@ -120,7 +122,7 @@ export default function CitizenFeedDrawer({
                   </button>
 
                   <span className="text-[10px] text-slate-500">
-                    By: {report.reporter_name || 'Anonymous'}
+                    → {t('by')}{report.reporter_name || `→ ${t('anonymous')}`}
                   </span>
                 </div>
 
@@ -131,7 +133,7 @@ export default function CitizenFeedDrawer({
                     className="w-full py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors"
                   >
                     <ShieldCheck size={14} />
-                    <span>Verify & Mark on Official Map</span>
+                    <span>→ {t('verify_official_map')}</span>
                   </button>
                 )}
               </div>

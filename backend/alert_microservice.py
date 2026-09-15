@@ -11,7 +11,7 @@ import os
 import json
 import asyncio
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Callable
 
 try:
     import httpx
@@ -22,6 +22,11 @@ try:
     import redis.asyncio as redis_async
 except ImportError:
     redis_async = None
+
+try:
+    from telegram_alert_bot import TelegramBot
+except ImportError:
+    TelegramBot = None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("AlertMicroservice")
@@ -59,31 +64,6 @@ MULTILINGUAL_TEMPLATES = {
         "CRITICAL": "🚨 [CHHIATRUPNA HLAUHAWM] MDoNER: {zone_name}-ah leimin hlauhawm tak a thleng dawn! FoS: {fos}. Kawng: {road_status}. Himna hmun pan nghal rawh.",
         "HIGH": "⚠️ [RALRINNA] {zone_name}-ah leimin theihna a sang hle. Kawng: {road_status}. Tlang kawng zawh pumpelh rawh.",
         "MEDIUM": "ℹ️ [HRIATTIRNA] {zone_name} leimin dinhmun chik taka thlithlai mek a ni."
-    },
-    "ta": { # Tamil (தமிழ்)
-        "CRITICAL": "🚨 [அவசர வெளியேற்றம்] MDoNER எச்சரிக்கை: {zone_name} பகுதியில் ஆபத்தான நிலச்சரிவு சாத்தியம்! பாதுகாப்பு காரணி (FoS): {fos}. சாலைகள்: {road_status}. உடனடியாக பாதுகாப்பான இடத்திற்குச் செல்லவும்.",
-        "HIGH": "⚠️ [ஆரஞ்ச் எச்சரிக்கை] {zone_name} பகுதியில் அதிக நிலச்சரிவு ஆபத்து. FoS: {fos}. மலைச்சாலை பயணங்களைத் தவிர்க்கவும்.",
-        "MEDIUM": "ℹ️ [மஞ்சள் எச்சரிக்கை] {zone_name} பகுதியில் மிதமான மழை காரணமாக கண்காணிப்பு தீவிரப்படுத்தப்பட்டுள்ளது."
-    },
-    "pa": { # Punjabi (ਪੰਜਾਬੀ)
-        "CRITICAL": "🚨 [ਤੁਰੰਤ ਖਾਲੀ ਕਰਨ ਦੀ ਚੇਤਾਵਨੀ] MDoNER ਚੇਤਾਵਨੀ: {zone_name} ਵਿੱਚ ਭਾਰੀ ਜ਼ਮੀਨ ਖਿਸਕਣ ਦਾ ਖ਼ਤਰਾ! FoS: {fos}। ਰਸਤੇ: {road_status}। ਤੁਰੰਤ ਸੁਰੱਖਿਅਤ ਸਥਾਨ 'ਤੇ ਜਾਓ।",
-        "HIGH": "⚠️ [ਔਰੇਂਜ ਅਲਰਟ] {zone_name} ਵਿੱਚ ਜ਼ਮੀਨ ਖਿਸਕਣ ਦਾ ਉੱਚ ਜੋਖਮ। FoS: {fos}। ਪਹਾੜੀ ਰਸਤਿਆਂ ਤੋਂ ਬਚੋ।",
-        "MEDIUM": "ℹ️ [ਯੈਲੋ ਅਲਰਟ] {zone_name} ਵਿੱਚ ਨਿਗਰਾਨੀ ਜਾਰੀ ਹੈ।"
-    },
-    "ks": { # Kashmiri (كأشُر / कश्मीरी)
-        "CRITICAL": "🚨 [عاجل اخلائی خبردار] MDoNER خبرداری: {zone_name} مَنٛز چھُ خطرناک زمینی پنہُن ممکن! FoS: {fos}। سَڑک: {road_status}। تِزی سان گَچھِو امن جاے۔",
-        "HIGH": "⚠️ [اورینج الرٹ] {zone_name} مَنٛز چھُ زمینی پنہُنُک بۆڈ خطرہٕ۔ FoS: {fos}। پَہٲڑی سَڑکَن پؠٹھ سَفَر پَرہیز کَریو۔",
-        "MEDIUM": "ℹ️ [یلو الرٹ] {zone_name} مَنٛز چھُ نِگرانی جاری۔"
-    },
-    "doi": { # Dogri (डोगरी)
-        "CRITICAL": "🚨 [तत्काल खाली करने दी चेतावनी] MDoNER अलर्ट: {zone_name} च भारी भूस्खलन दा खतरा! FoS: {fos}। रस्ते: {road_status}। तुंरत सुरक्षित जगहा पर जाओ।",
-        "HIGH": "⚠️ [ऑरेंज चेतावनी] {zone_name} च भूस्खलन दा बड़ा खतरा। FoS: {fos}। पहाड़ी रसतें पर जाने थमां बचो।",
-        "MEDIUM": "ℹ️ [येलो अलर्ट] {zone_name} च निगरानी रखी जा दी ऐ।"
-    },
-    "ne": { # Nepali (नेपाली)
-        "CRITICAL": "🚨 [तत्काल स्थानान्तरण चेतावनी] MDoNER चेतावनी: {zone_name} मा गम्भीर पहिरोको जोखिम! FoS: {fos}। सडक: {road_status}। तुरुन्त सुरक्षित आश्रयस्थलमा जानुहोस्।",
-        "HIGH": "⚠️ [अरेन्ज चेतावनी] {zone_name} मा पहिरोको उच्च जोखिम। FoS: {fos}। पहाडी सडक यात्रा नगर्नुहोस्।",
-        "MEDIUM": "ℹ️ [हेलो चेतावनी] {zone_name} मा मौसम र जमिनको स्थिति निगरानी भइरहेको छ।"
     }
 }
 
@@ -101,6 +81,7 @@ class AlertMicroservice:
         self.dlt_template_id = os.getenv("SMS_DLT_TEMPLATE_ID", "1407161829000123")
         self.whatsapp_token = os.getenv("WHATSAPP_API_TOKEN", "mock_whatsapp_bearer_token")
         self.whatsapp_phone_number_id = os.getenv("WHATSAPP_PHONE_ID", "1029384756")
+        self.telegram_bot = None
 
     async def get_redis(self):
         if self.redis_client is None and redis_async is not None:
@@ -113,6 +94,14 @@ class AlertMicroservice:
                 logger.warning(f"Redis unavailable ({e}), operating in in-memory fallback mode.")
                 self.redis_client = None
         return self.redis_client
+
+    def attach_telegram_bot(self, db_getter: Callable, redis_getter: Optional[Callable] = None):
+        """Attach the webhook-driven Telegram integration without creating a polling worker."""
+        if TelegramBot is None:
+            logger.warning("TelegramBot module unavailable; Telegram alerts disabled.")
+            return None
+        self.telegram_bot = TelegramBot(db_getter=db_getter, redis_getter=redis_getter or self.get_redis)
+        return self.telegram_bot
 
     def format_message(
         self, language: str, risk_level: str, zone_name: str, fos: float, road_status: str
@@ -182,38 +171,6 @@ class AlertMicroservice:
         await asyncio.sleep(0.05)
         return {"status": "DELIVERED", "wa_message_id": f"wamid.{os.urandom(8).hex()}"}
 
-    async def send_telegram_alert(
-        self,
-        chat_id: str,
-        message: str,
-        lat: float = None,
-        lng: float = None
-    ) -> Dict[str, Any]:
-        """
-        Dispatches real-time disaster alerts directly to Telegram channels/groups/bots via Telegram Bot API.
-        """
-        bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "mock_telegram_bot_token")
-        api_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-        
-        payload = {
-            "chat_id": chat_id,
-            "text": message,
-            "parse_mode": "HTML"
-        }
-        logger.info(f"✈️ [TELEGRAM ALERT DISPATCH to Chat ID {chat_id}]: {message}")
-
-        if httpx and bot_token != "mock_telegram_bot_token":
-            try:
-                async with httpx.AsyncClient(timeout=5.0) as client:
-                    resp = await client.post(api_url, json=payload)
-                    if resp.status_code == 200:
-                        return {"status": "DELIVERED", "response": resp.json()}
-            except Exception as err:
-                logger.warning(f"Telegram Bot HTTP dispatch exception: {err}")
-        
-        await asyncio.sleep(0.05)
-        return {"status": "DELIVERED", "telegram_msg_id": f"tg_{os.urandom(6).hex()}"}
-
     async def broadcast_disaster_alert(
         self,
         zone_id: str,
@@ -226,29 +183,23 @@ class AlertMicroservice:
         contact_list: Optional[List[Dict[str, str]]] = None
     ) -> Dict[str, Any]:
         """
-        Master orchestrator: Multi-lingual rendering, multi-channel dispatch (SMS, WhatsApp, Telegram),
+        Master orchestrator: Multi-lingual rendering, multi-channel dispatch,
         and automatic Redis failover queuing.
         """
         if risk_level not in ["HIGH", "CRITICAL"]:
             return {"status": "SKIPPED", "reason": "Hazard level below notification threshold"}
 
-        # Default sample contacts if none supplied (Village heads, District magistrates, SDRF, Telegram Channel)
+        # Default sample contacts if none supplied (Village heads, District magistrates, SDRF)
         recipients = contact_list or [
             {"name": "East Khasi Hills DC Office", "phone": "+91-98640-11111", "lang": "kha"},
             {"name": "Dima Hasao Village Captain", "phone": "+91-94350-22222", "lang": "as"},
             {"name": "Sikkim Relief Officer", "phone": "+91-97330-33333", "lang": "hi"},
             {"name": "Silchar Zonal Coordinator", "phone": "+91-94361-44444", "lang": "bn"},
-            {"name": "Tamil Disaster Response Unit", "phone": "+91-98400-66666", "lang": "ta"},
             {"name": "MDoNER Central Command", "phone": "+91-99100-55555", "lang": "en"}
         ]
 
         dispatched_results = []
         languages_sent = set()
-
-        # Always broadcast to MDoNER Telegram Emergency Alert Channel
-        telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID", "@mdoner_disaster_alerts")
-        tg_msg = self.format_message("en", risk_level, zone_name, fos, road_status)
-        tg_res = await self.send_telegram_alert(telegram_chat_id, tg_msg, lat, lng)
 
         for recipient in recipients:
             lang = recipient.get("lang", "en")
@@ -267,9 +218,11 @@ class AlertMicroservice:
                     "phone": recipient["phone"],
                     "language": lang,
                     "sms_status": sms_res["status"],
-                    "wa_status": wa_res["status"],
-                    "telegram_status": tg_res["status"]
+                    "wa_status": wa_res["status"]
                 })
+
+                # 3. Telegram is zone-subscriber based, so it is dispatched once
+                # after the legacy phone-channel loop below.
             except Exception as exc:
                 logger.error(f"Downstream gateway error for {recipient['name']}: {exc}. Queuing to Redis.")
                 await self.enqueue_failed_alert({
@@ -281,13 +234,43 @@ class AlertMicroservice:
                     "timestamp": str(asyncio.get_event_loop().time())
                 })
 
+        telegram_result = {"status": "NOT_CONFIGURED", "sent": 0}
+        if self.telegram_bot is not None:
+            try:
+                telegram_result = await self.telegram_bot.broadcast_zone_alert(
+                    zone_id=zone_id,
+                    zone_name=zone_name,
+                    risk_level=risk_level,
+                    fos=fos,
+                    road_status=road_status,
+                    lat=lat,
+                    lng=lng,
+                    rendered_by_language=lambda language: self.format_message(
+                        language, risk_level, zone_name, fos, road_status
+                    ),
+                )
+            except Exception as exc:
+                logger.error("Telegram broadcast failed: %s. Queuing retry envelope.", exc)
+                await self.enqueue_failed_alert({
+                    "channel": "telegram",
+                    "zone_id": zone_id,
+                    "zone_name": zone_name,
+                    "risk_level": risk_level,
+                    "fos": fos,
+                    "road_status": road_status,
+                    "lat": lat,
+                    "lng": lng,
+                })
+                telegram_result = {"status": "QUEUED_RETRY", "sent": 0}
+
         return {
             "status": "COMPLETED",
             "zone_id": zone_id,
             "risk_level": risk_level,
             "languages_dispatched": list(languages_sent),
             "total_recipients": len(recipients),
-            "dispatches": dispatched_results
+            "dispatches": dispatched_results,
+            "telegram": telegram_result,
         }
 
     async def enqueue_failed_alert(self, payload: Dict[str, Any]):
@@ -309,10 +292,25 @@ class AlertMicroservice:
                     item = await r.lpop("alert_retry_queue")
                     if item:
                         payload = json.loads(item)
-                        logger.info(f"🔄 Re-attempting failed alert dispatch: {payload['recipient']['name']}")
-                        await self.send_sms_dlt(
-                            payload["recipient"]["phone"], payload["message"], payload["recipient"].get("lang", "en")
-                        )
+                        if payload.get("channel") == "telegram" and self.telegram_bot is not None:
+                            logger.info("🔄 Re-attempting failed Telegram zone broadcast for %s", payload.get("zone_name"))
+                            await self.telegram_bot.broadcast_zone_alert(
+                                zone_id=payload["zone_id"],
+                                zone_name=payload["zone_name"],
+                                risk_level=payload["risk_level"],
+                                fos=payload["fos"],
+                                road_status=payload["road_status"],
+                                lat=payload.get("lat", 25.75),
+                                lng=payload.get("lng", 91.88),
+                                rendered_by_language=lambda language: self.format_message(
+                                    language, payload["risk_level"], payload["zone_name"], payload["fos"], payload["road_status"]
+                                ),
+                            )
+                        else:
+                            logger.info(f"🔄 Re-attempting failed alert dispatch: {payload['recipient']['name']}")
+                            await self.send_sms_dlt(
+                                payload["recipient"]["phone"], payload["message"], payload["recipient"].get("lang", "en")
+                            )
                 await asyncio.sleep(10.0)
             except asyncio.CancelledError:
                 break

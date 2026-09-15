@@ -29,10 +29,8 @@ import SimulationDrawer from './components/SimulationDrawer';
 import CitizenFeedDrawer from './components/CitizenFeedDrawer';
 import FieldReportingModal from './components/FieldReportingModal';
 import EmergencyResourcesModal from './components/EmergencyResourcesModal';
-import HurricaneTrackerModal from './components/HurricaneTrackerModal';
-import TrafficOrchestrationModal from './components/TrafficOrchestrationModal';
-import SoilMoistureHistoryModal from './components/SoilMoistureHistoryModal';
 import { registerBackgroundSync, syncOfflineReports } from './utils/indexedDbSync';
+import { translations, languageOptions } from './translations/translations';
 
 export default function App() {
   // --- CORE STATE ---
@@ -45,16 +43,34 @@ export default function App() {
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
   const [activeEmergencyNotice, setActiveEmergencyNotice] = useState(null);
-  const [uiLanguage, setUiLanguage] = useState('en');
+  const [language, setLanguage] = useState(
+  localStorage.getItem('nexusrisk_language') || 'en'
+);
+
+const t = useCallback(
+  (key) => {
+    const currentLanguage = translations[language];
+
+    if (currentLanguage && currentLanguage[key]) {
+      return currentLanguage[key];
+    }
+
+    return translations.en[key] || key;
+  },
+  [language]
+);
+
+const changeLanguage = (lang) => {
+  console.log("🌐 Language changed to:", lang);
+  setLanguage(lang);
+  localStorage.setItem('nexusrisk_language', lang);
+};
 
   // --- MODAL & DRAWER TOGGLES ---
   const [isSimulationOpen, setIsSimulationOpen] = useState(false);
   const [isCitizenFeedOpen, setIsCitizenFeedOpen] = useState(false);
   const [isReportingOpen, setIsReportingOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
-  const [isHurricaneOpen, setIsHurricaneOpen] = useState(false);
-  const [isTrafficOpen, setIsTrafficOpen] = useState(false);
-  const [isSoilHistoryOpen, setIsSoilHistoryOpen] = useState(false);
   const [isKpiOpen, setIsKpiOpen] = useState(true);
 
   // --- COLLAPSE/EXPAND STATE ---
@@ -375,9 +391,45 @@ export default function App() {
   };
 
   // --- MANUAL BROADCAST WARNING ---
-  const handleTriggerBroadcast = (zoneProp) => {
-    alert(`🚨 Emergency Broadcast Triggered!\n\nDispatched multi-lingual warnings in English, Assamese, Bengali, Hindi, Khasi, and Mizo to local village heads and district authorities for:\n\n${zoneProp.zone_name}`);
-  };
+const handleTriggerBroadcast = async (zoneProp) => {
+  try {
+    const response = await fetch('/api/v1/alerts/manual', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        zone_id: zoneProp.zone_id,
+        risk_level:
+          zoneProp.current_risk_status === 'CRITICAL'
+            ? 'CRITICAL'
+            : 'HIGH',
+        fos: zoneProp.current_fos,
+        road_status: 'OPEN',
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'Failed to trigger alert');
+    }
+
+    alert(
+      `🚨 MANUAL ALERT TRIGGERED\n\n` +
+      `Zone: ${data.zone_name}\n` +
+      `Risk: ${data.risk_level}\n` +
+      `FoS: ${data.fos}\n\n` +
+      `Emergency notifications have been dispatched.`
+    );
+  } catch (error) {
+    console.error('Manual alert failed:', error);
+
+    alert(
+      `❌ Failed to trigger emergency alert.\n\n${error.message}`
+    );
+  }
+};
 
   return (
     <div className="relative h-screen w-screen bg-slate-950 font-sans text-slate-100 selection:bg-indigo-500 selection:text-white overflow-hidden">
@@ -393,6 +445,7 @@ export default function App() {
           citizenReports={citizenReports}
           selectedTarget={selectedTarget}
           onTriggerAlert={handleTriggerBroadcast}
+          t={t}
         />
       </main>
 
@@ -425,7 +478,7 @@ export default function App() {
               className={`h-2.5 w-2.5 rounded-full ${wsConnected ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-rose-500 animate-ping'}`}
             ></span>
             <span className="text-slate-200 font-semibold text-[11px] tracking-wide">
-              {wsConnected ? 'LIVE TELEMETRY' : 'RECONNECTING'}
+              {wsConnected ? t('live_telemetry') : t('reconnecting')}
             </span>
           </div>
 
@@ -434,57 +487,37 @@ export default function App() {
             <span className="text-[10px] text-slate-400 font-bold tracking-widest">IST</span>
             <span className="font-mono text-xs text-white font-bold tracking-wider">{liveTime}</span>
           </div>
+{/* Language Selector */}
+<div className="relative">
+  <select
+    value={language}
+    onChange={(e) => changeLanguage(e.target.value)}
+    className="appearance-none bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1.5 pr-8 text-xs font-semibold text-white cursor-pointer focus:outline-none focus:border-indigo-500 shadow-md"
+    title={t('language')}
+  >
+    {languageOptions.map((lang) => (
+      <option
+        key={lang.code}
+        value={lang.code}
+        className="bg-slate-900 text-white"
+      >
+        {lang.flag} {lang.label}
+      </option>
+    ))}
+  </select>
 
-          {/* Multilingual Selector */}
-          <select
-            value={uiLanguage}
-            onChange={(e) => setUiLanguage(e.target.value)}
-            className="bg-black/60 text-slate-200 border border-white/10 text-xs font-bold rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 shadow-md cursor-pointer"
-          >
-            <option value="en">🌐 English</option>
-            <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
-            <option value="pa">🇮🇳 ਪੰਜਾਬੀ (Punjabi)</option>
-            <option value="ks">🇮🇳 كأشُر (Kashmiri)</option>
-            <option value="doi">🇮🇳 डोगरी (Dogri)</option>
-            <option value="ne">🇳🇵 नेपाली (Nepali)</option>
-            <option value="as">🇮🇳 অসমীয়া (Assamese)</option>
-            <option value="bn">🇮🇳 বাংলা (Bengali)</option>
-            <option value="kha">🇮🇳 Khasi (Meghalaya)</option>
-            <option value="miz">🇮🇳 Mizo (Mizoram)</option>
-            <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
-          </select>
-
+  <ChevronDown
+    size={13}
+    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+  />
+</div>
           {/* Quick Action Buttons */}
-          <button
-            onClick={() => setIsHurricaneOpen(true)}
-            className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-lg shadow-cyan-600/30 transition-all border border-cyan-400/40"
-          >
-            <Activity size={14} />
-            <span>Cyclone Feed</span>
-          </button>
-
-          <button
-            onClick={() => setIsTrafficOpen(true)}
-            className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-indigo-300 backdrop-blur-md border border-indigo-500/40 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-md"
-          >
-            <Compass size={14} className="text-indigo-400" />
-            <span>Traffic Reroute</span>
-          </button>
-
-          <button
-            onClick={() => setIsSoilHistoryOpen(true)}
-            className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-blue-300 backdrop-blur-md border border-blue-500/40 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-md"
-          >
-            <CloudRain size={14} className="text-blue-400" />
-            <span>Soil Analytics</span>
-          </button>
-
           <button
             onClick={() => setIsReportingOpen(true)}
             className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-lg shadow-indigo-600/40 transition-all border border-indigo-400/50"
           >
             <PlusCircle size={14} />
-            <span>Field Report</span>
+            <span>{t('field_report')}</span>
           </button>
 
           <button
@@ -492,7 +525,7 @@ export default function App() {
             className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-slate-200 backdrop-blur-md border border-white/10 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-md"
           >
             <Sliders size={14} className="text-indigo-400" />
-            <span>Simulator</span>
+            <span>{t('simulator')}</span>
           </button>
 
           <button
@@ -500,7 +533,7 @@ export default function App() {
             className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-slate-200 backdrop-blur-md border border-white/10 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-md"
           >
             <Camera size={14} className="text-amber-400" />
-            <span>Citizen Feed ({citizenReports.length})</span>
+            <span>{t('citizen_feed')} ({citizenReports.length})</span>
           </button>
 
           <button
@@ -508,7 +541,7 @@ export default function App() {
             className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-slate-200 backdrop-blur-md border border-white/10 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-md"
           >
             <Truck size={14} className="text-emerald-400" />
-            <span>Assets</span>
+            <span>{t('assets')}</span>
           </button>
 
           <button
@@ -534,7 +567,7 @@ export default function App() {
               onClick={() => setSelectedTarget({ lat: activeEmergencyNotice.coords[0], lng: activeEmergencyNotice.coords[1], zoom: 11 })}
               className="px-2.5 py-1 bg-black/40 hover:bg-black/60 backdrop-blur-sm border border-white/20 rounded text-[11px] font-semibold transition-colors"
             >
-              Zoom to Hazard
+             {t('zoom_to_hazard')}
             </button>
             <button
               onClick={() => setActiveEmergencyNotice(null)}
@@ -556,7 +589,9 @@ export default function App() {
         <div className="flex items-center justify-between p-3 border-b border-white/10 bg-black/20">
           <div className="flex items-center space-x-2">
             <Layers size={16} className="text-indigo-400" />
-            <span className="text-[11px] font-black uppercase tracking-widest text-slate-200">GIS Command</span>
+            <span className="text-[11px] font-black uppercase tracking-widest text-slate-200">
+  {t('gis_command')}
+</span>
           </div>
           <button 
             onClick={toggleLeft}
@@ -574,7 +609,7 @@ export default function App() {
                 <Search className="absolute left-3.5 top-2.5 text-slate-400" size={16} />
                 <input
                   type="text"
-                  placeholder="Search zones, NH routes, districts..."
+                  placeholder={t('search_placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all shadow-inner"
@@ -598,7 +633,9 @@ export default function App() {
             {/* Severity Ranked Zone Cards Stream */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
               <div className="flex items-center justify-between text-[10px] font-bold tracking-widest text-slate-300 uppercase pb-1 drop-shadow-sm">
-                <span>Vulnerable Sectors ({filteredZones.length})</span>
+                <span>
+  {t('vulnerable_sectors')} ({filteredZones.length})
+</span>
                 <span className="text-indigo-400">SRID 4326</span>
               </div>
 
@@ -686,10 +723,30 @@ export default function App() {
                         <span>Soil: {p.soil_type?.split(' ')[0]}</span>
                         <span className="text-indigo-400 font-bold group-hover:text-indigo-300 flex items-center space-x-1">
                           <MapPin size={12} />
-                          <span>Locate on GIS</span>
+                          <span>{t('locate_on_gis')}</span>
                         </span>
                       </div>
+                      <button
+  onClick={(e) => {
+    e.stopPropagation();
+    handleTriggerBroadcast(p);
+  }}
+  disabled={status !== 'CRITICAL' && status !== 'HIGH'}
+  className={`w-full mt-2 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
+    status === 'CRITICAL'
+      ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30'
+      : status === 'HIGH'
+        ? 'bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-600/30'
+        : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
+  }`}
+>
+  <AlertTriangle size={13} />
+  {status === 'CRITICAL' || status === 'HIGH'
+   ? t('trigger_emergency_alert')
+: t('alert_not_required')}
+</button>
                     </div>
+                    
                   );
                 })
               )}
@@ -705,6 +762,7 @@ export default function App() {
         isOpen={isSimulationOpen}
         onClose={() => setIsSimulationOpen(false)}
         onRunSimulation={handleSimulationResults}
+        t={t}
       />
 
       <CitizenFeedDrawer
@@ -720,6 +778,7 @@ export default function App() {
           }
         }}
         onSelectLocation={(coord) => setSelectedTarget(coord)}
+        t={t}
       />
 
       <FieldReportingModal
@@ -732,23 +791,6 @@ export default function App() {
         isOpen={isResourcesOpen}
         onClose={() => setIsResourcesOpen(false)}
         onSelectLocation={(coord) => setSelectedTarget(coord)}
-      />
-
-      <HurricaneTrackerModal
-        isOpen={isHurricaneOpen}
-        onClose={() => setIsHurricaneOpen(false)}
-        onSelectLocation={(coord) => setSelectedTarget(coord)}
-      />
-
-      <TrafficOrchestrationModal
-        isOpen={isTrafficOpen}
-        onClose={() => setIsTrafficOpen(false)}
-        onOrchestrate={(plan) => console.log("Traffic plan active:", plan)}
-      />
-
-      <SoilMoistureHistoryModal
-        isOpen={isSoilHistoryOpen}
-        onClose={() => setIsSoilHistoryOpen(false)}
       />
     </div>
   );

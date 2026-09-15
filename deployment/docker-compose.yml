@@ -86,6 +86,10 @@ services:
       - REDIS_URL=redis://mdoner-cache-pubsub:6379/0
       - SMS_DLT_SENDER_ID=MDONER
       - SMS_DLT_TEMPLATE_ID=1407161829000123
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_WEBHOOK_URL=${TELEGRAM_WEBHOOK_URL:-}
+      - TELEGRAM_WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET:-}
+      - GIS_DASHBOARD_URL=${GIS_DASHBOARD_URL:-http://localhost:3000}
     depends_on:
       mdoner-gis-db:
         condition: service_healthy

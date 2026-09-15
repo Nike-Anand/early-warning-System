@@ -452,3 +452,25 @@ kubectl apply -f deployment/k8s/ingress.yaml
 
 ## 📜 License & Acknowledgements
 Developed for the **Smart India Hackathon (SIH ID: 26001)** under the Ministry of Development of North Eastern Region (MDoNER).
+
+## Telegram real-time alert bot
+
+The Telegram integration is part of `AlertMicroservice`; it does not run a polling loop. Configure `TELEGRAM_BOT_TOKEN` and a public HTTPS `TELEGRAM_WEBHOOK_URL` in `.env`. On backend startup the service calls Telegram `setWebhook` once and receives updates at `/api/v1/telegram/webhook`.
+
+Supported commands:
+
+- `/start`
+- `/subscribe ZONE_CODE`
+- `/lang en|hi|as|bn|kha|miz`
+- `/status`
+- `/critical`
+- `/unsubscribe`
+- `/update_status RESOURCE_ID available|deployed`
+
+Critical/high zone alerts use the same multilingual templates as SMS/WhatsApp and add inline buttons for evacuation route, safety confirmation, and field-condition reporting.
+
+For local development, Telegram cannot call `http://localhost:8000` directly. Use a public HTTPS tunnel or deploy the API on a public HTTPS endpoint before enabling the webhook.
+
+## Model accuracy logging
+
+Every telemetry prediction is written to `model_predictions_log`. A field officer can record ground truth using `PATCH /api/v1/model/predictions/{prediction_id}/feedback`; measured binary precision/recall is exposed at `GET /api/v1/model/accuracy` and is only computed over predictions with recorded outcomes.
