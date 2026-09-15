@@ -96,6 +96,33 @@ const changeLanguage = (lang) => {
   // --- DATA FETCHING ---
   const [isLoading, setIsLoading] = useState(true);
 
+  const mapSupabaseReport = (r) => {
+    let lat = 0, lng = 0;
+    if (r.geo_coordinates) {
+      const parts = r.geo_coordinates.split(',');
+      if (parts.length === 2) {
+        lat = parseFloat(parts[0].trim());
+        lng = parseFloat(parts[1].trim());
+      }
+    }
+    return {
+      id: r.id,
+      report_id: r.id,
+      category: r.category,
+      hazard_type: r.category,
+      severity_estimate: r.severity_level,
+      landmark_description: r.physical_observations,
+      latitude: lat,
+      longitude: lng,
+      lat: lat,
+      lng: lng,
+      multimedia_url: r.image_url,
+      reporter_name: r.reported_by,
+      status: r.status,
+      created_at: r.created_at
+    };
+  };
+
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -119,7 +146,9 @@ const changeLanguage = (lang) => {
           const { data: lowerCaseReports } = await supabase.from('field_reports').select('*').order('created_at', { ascending: false });
           sbReports = lowerCaseReports;
         }
-        if (sbReports) setCitizenReports(sbReports);
+        if (sbReports) {
+          setCitizenReports(sbReports.map(mapSupabaseReport));
+        }
       } catch (err) {
         console.warn('Supabase polling failed', err);
       }
@@ -277,7 +306,35 @@ const changeLanguage = (lang) => {
           const { data: lowerCaseReports } = await supabase.from('field_reports').select('*').order('created_at', { ascending: false });
           sbReports = lowerCaseReports;
         }
-        if (sbReports) setCitizenReports(sbReports);
+        if (sbReports) {
+          const mappedReports = sbReports.map(r => {
+            let lat = 0, lng = 0;
+            if (r.geo_coordinates) {
+              const parts = r.geo_coordinates.split(',');
+              if (parts.length === 2) {
+                lat = parseFloat(parts[0].trim());
+                lng = parseFloat(parts[1].trim());
+              }
+            }
+            return {
+              id: r.id,
+              report_id: r.id,
+              category: r.category,
+              hazard_type: r.category,
+              severity_estimate: r.severity_level,
+              landmark_description: r.physical_observations,
+              latitude: lat,
+              longitude: lng,
+              lat: lat,
+              lng: lng,
+              multimedia_url: r.image_url,
+              reporter_name: r.reported_by,
+              status: r.status,
+              created_at: r.created_at
+            };
+          });
+          setCitizenReports(mappedReports);
+        }
       } catch (err) {
         console.warn('Supabase polling failed', err);
       }
@@ -289,12 +346,12 @@ const changeLanguage = (lang) => {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'Field_reports' },
-        (payload) => setCitizenReports((prev) => [payload.new, ...prev])
+        (payload) => setCitizenReports((prev) => [mapSupabaseReport(payload.new), ...prev])
       )
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'field_reports' },
-        (payload) => setCitizenReports((prev) => [payload.new, ...prev])
+        (payload) => setCitizenReports((prev) => [mapSupabaseReport(payload.new), ...prev])
       )
       .subscribe();
 

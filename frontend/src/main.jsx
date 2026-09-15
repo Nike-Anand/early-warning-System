@@ -3,13 +3,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import './index.css';
 
-// Register PWA Service Worker for Offline Vector-Tile Caching
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((reg) => console.log('✅ [PWA] Service Worker registered:', reg.scope))
-      .catch((err) => console.warn('PWA registration failed:', err));
+// Forcefully unregister any broken service workers from previous PWA attempts
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (let registration of registrations) {
+      registration.unregister().then(() => {
+        console.log('🗑️ [PWA] Service Worker unregistered successfully to fix tile caching issues.');
+      });
+    }
   });
 }
 

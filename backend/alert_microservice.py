@@ -11,7 +11,13 @@ import os
 import json
 import asyncio
 import logging
+import datetime
 from typing import Dict, Any, List, Optional, Callable
+
+try:
+    import psycopg2
+except ImportError:
+    psycopg2 = None
 
 try:
     import httpx
@@ -262,6 +268,33 @@ class AlertMicroservice:
                     "lng": lng,
                 })
                 telegram_result = {"status": "QUEUED_RETRY", "sent": 0}
+
+        # --- PERSIST ALERT TO POSTGRESQL SO MOBILE APP CAN POLL IT ---
+        if psycopg2 is not None:
+            db_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres_secure_password_sih26001@localhost:5432/mdoner_gis")
+            try:
+                conn = psycopg2.connect(db_url)
+                cur = conn.cursor()
+                summary_text = f"Manual Dispatch: {risk_level} alert for {zone_name}. FoS: {fos}"
+                cur.execute("""
+                    INSERT INTO alert_logs (
+                        zone_id, risk_level, factor_of_safety, rainfall_threshold_ratio,
+                        dispatched_languages, sms_recipients_count, websocket_broadcast,
+                        summary_text, dispatched_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING alert_id;
+                """, (
+                    zone_id, risk_level, fos, 1.0,
+                    list(languages_sent), len(recipients), True,
+                    summary_text, datetime.datetime.now(datetime.timezone.utc)
+                ))
+                inserted_alert_id = cur.fetchone()[0]
+                conn.commit()
+                cur.close()
+                conn.close()
+                logger.info(f"✅ Saved alert_logs record (ID: {inserted_alert_id}) for mobile app polling.")
+            except Exception as e:
+                logger.error(f"Failed to insert into alert_logs: {e}")
 
         return {
             "status": "COMPLETED",
