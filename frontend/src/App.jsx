@@ -39,6 +39,7 @@ export default function App() {
   const [infrastructure, setInfrastructure] = useState([]);
   const [sensorNodes, setSensorNodes] = useState([]);
   const [citizenReports, setCitizenReports] = useState([]);
+  const [resources, setResources] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedState, setSelectedState] = useState('ALL');
   const [selectedTarget, setSelectedTarget] = useState(null);
@@ -118,9 +119,25 @@ const changeLanguage = (lang) => {
           const { data: lowerCaseReports } = await supabase.from('field_reports').select('*').order('created_at', { ascending: false });
           sbReports = lowerCaseReports;
         }
-        setCitizenReports(sbReports || []);
+        if (sbReports) setCitizenReports(sbReports);
       } catch (err) {
-        console.warn('Supabase fetch failed', err);
+        console.warn('Supabase polling failed', err);
+      }
+
+      // 4. Fetch Emergency Resources
+      try {
+        const resResp = await fetch('/api/v1/emergency/resources');
+        if (resResp.ok) {
+           const resData = await resResp.json();
+           setResources(resData.resources || []);
+        }
+      } catch (err) {
+         // Mock data if backend is offline
+         setResources([
+           { resource_id: 'v1', resource_name: 'NDRF Unit 1', unit_type: 'NDRF_BATTALION', stationed_location: 'Shillong Bypass HQ', lat: 25.575, lon: 91.885, personnel_count: 45, contact_officer: 'Cmdr A. Sharma' },
+           { resource_id: 'v2', resource_name: 'SDRF Team Alpha', unit_type: 'SDRF_TEAM', stationed_location: 'Guwahati Base', lat: 26.155, lon: 91.755, personnel_count: 20, contact_officer: 'Lt B. Das' },
+           { resource_id: 'v3', resource_name: 'BRO Heavy Excavator', unit_type: 'HEAVY_EXCAVATOR', stationed_location: 'Tawang Route', lat: 27.585, lon: 91.865, personnel_count: 4, contact_officer: 'Sgt C. Singh' }
+         ]);
       }
     } catch (err) {
       console.warn("Backend fetch failed, relying on mock/fallback state:", err);
@@ -484,6 +501,7 @@ const handleTriggerBroadcast = async (zoneProp) => {
           infrastructure={infrastructure}
           sensorNodes={sensorNodes}
           citizenReports={citizenReports}
+          resources={resources}
           selectedTarget={selectedTarget}
           onTriggerAlert={handleTriggerBroadcast}
           t={t}
@@ -845,6 +863,7 @@ const handleTriggerBroadcast = async (zoneProp) => {
       <EmergencyResourcesModal
         isOpen={isResourcesOpen}
         onClose={() => setIsResourcesOpen(false)}
+        resources={resources}
         onSelectLocation={(coord) => setSelectedTarget(coord)}
       />
     </div>

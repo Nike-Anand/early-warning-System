@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Truck, Users, Phone, MapPin, CheckCircle, Clock, Shield } from 'lucide-react';
 
-export default function EmergencyResourcesModal({ isOpen, onClose, onSelectLocation = () => {} }) {
-  const [resources, setResources] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (isOpen) {
-      fetch('/api/v1/emergency/resources')
-        .then(r => r.json())
-        .then(d => {
-          setResources(d.resources || []);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error("Resource fetch failed:", err);
-          setLoading(false);
-        });
-    }
-  }, [isOpen]);
+export default function EmergencyResourcesModal({ isOpen, onClose, resources = [], onSelectLocation = () => {} }) {
+  const [searchTerm, setSearchTerm] = useState('');
 
   if (!isOpen) return null;
+
+  const filteredResources = resources.filter(res => 
+    res.stationed_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    res.resource_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const getTypeBadge = (type) => {
     switch (type) {
@@ -57,14 +46,23 @@ export default function EmergencyResourcesModal({ isOpen, onClose, onSelectLocat
           </button>
         </div>
 
+        {/* Search Bar */}
+        <div className="px-5 pt-4 pb-2">
+          <input
+            type="text"
+            placeholder="Search by location (e.g. Shillong) or vehicle name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+          />
+        </div>
+
         {/* Resources Grid */}
-        <div className="p-5 space-y-3 overflow-y-auto custom-scrollbar flex-1">
-          {loading ? (
-            <div className="text-center py-10 text-slate-500 text-xs">Loading emergency assets...</div>
-          ) : resources.length === 0 ? (
-            <div className="text-center py-10 text-slate-500 text-xs">No emergency resources registered.</div>
+        <div className="px-5 pb-5 pt-2 space-y-3 overflow-y-auto custom-scrollbar flex-1">
+          {filteredResources.length === 0 ? (
+            <div className="text-center py-10 text-slate-500 text-xs">No emergency resources matching your search.</div>
           ) : (
-            resources.map((res) => (
+            filteredResources.map((res) => (
               <div
                 key={res.resource_id}
                 className="p-4 bg-slate-950 border border-slate-800 rounded-xl hover:border-slate-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-3"

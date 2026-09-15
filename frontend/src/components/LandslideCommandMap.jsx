@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { ShieldAlert, Camera, Wifi } from 'lucide-react';
+import { ShieldAlert, Camera, Wifi, Truck } from 'lucide-react';
 
 // Collapsible map legend — extracted as its own component to honour Rules of Hooks
 function MapLegend({ t }) {
@@ -477,6 +477,20 @@ export default function LandslideCommandMap({
           onClick={() => handleSelect({ type: 'report', id: report.id || report.report_id, lng: report.longitude || report.lng || report.lon, lat: report.latitude || report.lat, zoom: 11 })}
         >
           <Camera size={12} className="text-white" />
+        </div>
+      ))}
+
+      {/* Emergency Resources (Vehicles) Overlay */}
+      {resources.map((res) => (
+        <div 
+          key={res.resource_id}
+          className="ze-marker absolute flex items-center justify-center w-6 h-6 bg-emerald-500/90 border border-white/50 backdrop-blur-md rounded-full pointer-events-auto shadow-lg z-40 transition-none hidden hover:scale-125 hover:z-50 cursor-pointer"
+          data-lon={res.lon || res.lng}
+          data-lat={res.lat}
+          title={res.resource_name || 'Emergency Vehicle'}
+          onClick={() => handleSelect({ type: 'resource', id: res.resource_id, lng: res.lon || res.lng, lat: res.lat, zoom: 11 })}
+        >
+          <Truck size={12} className="text-white" />
         </div>
       ))}
 
