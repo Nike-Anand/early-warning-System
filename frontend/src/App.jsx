@@ -231,7 +231,22 @@ const changeLanguage = (lang) => {
       if (r.syncedCount > 0) fetchData();
     });
 
-    // Listen for realtime changes from Supabase
+    // POLLING FALLBACK: Poll Supabase every 5 seconds 
+    // This ensures reports reflect immediately even if Supabase Realtime isn't configured in the DB.
+    const pollInterval = setInterval(async () => {
+      try {
+        let { data: sbReports, error } = await supabase.from('Field_reports').select('*').order('created_at', { ascending: false });
+        if (error) {
+          const { data: lowerCaseReports } = await supabase.from('field_reports').select('*').order('created_at', { ascending: false });
+          sbReports = lowerCaseReports;
+        }
+        if (sbReports) setCitizenReports(sbReports);
+      } catch (err) {
+        console.warn('Supabase polling failed', err);
+      }
+    }, 5000);
+
+    // Listen for realtime changes from Supabase (if Realtime IS enabled)
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -247,6 +262,7 @@ const changeLanguage = (lang) => {
       .subscribe();
 
     return () => {
+      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
   }, [fetchData]);
