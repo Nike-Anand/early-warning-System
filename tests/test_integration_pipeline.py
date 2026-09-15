@@ -133,8 +133,8 @@ class TestAlertMicroservice:
         self.service = AlertMicroservice()
 
     def test_multilingual_formatting_all_languages(self):
-        """Verify dynamic string interpolation across all 6 supported regional languages."""
-        languages = ["en", "as", "bn", "hi", "kha", "miz"]
+        """Verify dynamic string interpolation across all 7 supported regional languages."""
+        languages = ["en", "as", "bn", "hi", "kha", "miz", "ta"]
         for lang in languages:
             msg = self.service.format_message(
                 language=lang,

@@ -29,6 +29,9 @@ import SimulationDrawer from './components/SimulationDrawer';
 import CitizenFeedDrawer from './components/CitizenFeedDrawer';
 import FieldReportingModal from './components/FieldReportingModal';
 import EmergencyResourcesModal from './components/EmergencyResourcesModal';
+import HurricaneTrackerModal from './components/HurricaneTrackerModal';
+import TrafficOrchestrationModal from './components/TrafficOrchestrationModal';
+import SoilMoistureHistoryModal from './components/SoilMoistureHistoryModal';
 import { registerBackgroundSync, syncOfflineReports } from './utils/indexedDbSync';
 
 export default function App() {
@@ -42,12 +45,16 @@ export default function App() {
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
   const [activeEmergencyNotice, setActiveEmergencyNotice] = useState(null);
+  const [uiLanguage, setUiLanguage] = useState('en');
 
   // --- MODAL & DRAWER TOGGLES ---
   const [isSimulationOpen, setIsSimulationOpen] = useState(false);
   const [isCitizenFeedOpen, setIsCitizenFeedOpen] = useState(false);
   const [isReportingOpen, setIsReportingOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [isHurricaneOpen, setIsHurricaneOpen] = useState(false);
+  const [isTrafficOpen, setIsTrafficOpen] = useState(false);
+  const [isSoilHistoryOpen, setIsSoilHistoryOpen] = useState(false);
   const [isKpiOpen, setIsKpiOpen] = useState(true);
 
   // --- COLLAPSE/EXPAND STATE ---
@@ -428,7 +435,50 @@ export default function App() {
             <span className="font-mono text-xs text-white font-bold tracking-wider">{liveTime}</span>
           </div>
 
+          {/* Multilingual Selector */}
+          <select
+            value={uiLanguage}
+            onChange={(e) => setUiLanguage(e.target.value)}
+            className="bg-black/60 text-slate-200 border border-white/10 text-xs font-bold rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 shadow-md cursor-pointer"
+          >
+            <option value="en">🌐 English</option>
+            <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+            <option value="pa">🇮🇳 ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="ks">🇮🇳 كأشُر (Kashmiri)</option>
+            <option value="doi">🇮🇳 डोगरी (Dogri)</option>
+            <option value="ne">🇳🇵 नेपाली (Nepali)</option>
+            <option value="as">🇮🇳 অসমীয়া (Assamese)</option>
+            <option value="bn">🇮🇳 বাংলা (Bengali)</option>
+            <option value="kha">🇮🇳 Khasi (Meghalaya)</option>
+            <option value="miz">🇮🇳 Mizo (Mizoram)</option>
+            <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
+          </select>
+
           {/* Quick Action Buttons */}
+          <button
+            onClick={() => setIsHurricaneOpen(true)}
+            className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-lg shadow-cyan-600/30 transition-all border border-cyan-400/40"
+          >
+            <Activity size={14} />
+            <span>Cyclone Feed</span>
+          </button>
+
+          <button
+            onClick={() => setIsTrafficOpen(true)}
+            className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-indigo-300 backdrop-blur-md border border-indigo-500/40 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-md"
+          >
+            <Compass size={14} className="text-indigo-400" />
+            <span>Traffic Reroute</span>
+          </button>
+
+          <button
+            onClick={() => setIsSoilHistoryOpen(true)}
+            className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-blue-300 backdrop-blur-md border border-blue-500/40 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-md"
+          >
+            <CloudRain size={14} className="text-blue-400" />
+            <span>Soil Analytics</span>
+          </button>
+
           <button
             onClick={() => setIsReportingOpen(true)}
             className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-lg shadow-indigo-600/40 transition-all border border-indigo-400/50"
@@ -682,6 +732,23 @@ export default function App() {
         isOpen={isResourcesOpen}
         onClose={() => setIsResourcesOpen(false)}
         onSelectLocation={(coord) => setSelectedTarget(coord)}
+      />
+
+      <HurricaneTrackerModal
+        isOpen={isHurricaneOpen}
+        onClose={() => setIsHurricaneOpen(false)}
+        onSelectLocation={(coord) => setSelectedTarget(coord)}
+      />
+
+      <TrafficOrchestrationModal
+        isOpen={isTrafficOpen}
+        onClose={() => setIsTrafficOpen(false)}
+        onOrchestrate={(plan) => console.log("Traffic plan active:", plan)}
+      />
+
+      <SoilMoistureHistoryModal
+        isOpen={isSoilHistoryOpen}
+        onClose={() => setIsSoilHistoryOpen(false)}
       />
     </div>
   );

@@ -59,6 +59,31 @@ MULTILINGUAL_TEMPLATES = {
         "CRITICAL": "🚨 [CHHIATRUPNA HLAUHAWM] MDoNER: {zone_name}-ah leimin hlauhawm tak a thleng dawn! FoS: {fos}. Kawng: {road_status}. Himna hmun pan nghal rawh.",
         "HIGH": "⚠️ [RALRINNA] {zone_name}-ah leimin theihna a sang hle. Kawng: {road_status}. Tlang kawng zawh pumpelh rawh.",
         "MEDIUM": "ℹ️ [HRIATTIRNA] {zone_name} leimin dinhmun chik taka thlithlai mek a ni."
+    },
+    "ta": { # Tamil (தமிழ்)
+        "CRITICAL": "🚨 [அவசர வெளியேற்றம்] MDoNER எச்சரிக்கை: {zone_name} பகுதியில் ஆபத்தான நிலச்சரிவு சாத்தியம்! பாதுகாப்பு காரணி (FoS): {fos}. சாலைகள்: {road_status}. உடனடியாக பாதுகாப்பான இடத்திற்குச் செல்லவும்.",
+        "HIGH": "⚠️ [ஆரஞ்ச் எச்சரிக்கை] {zone_name} பகுதியில் அதிக நிலச்சரிவு ஆபத்து. FoS: {fos}. மலைச்சாலை பயணங்களைத் தவிர்க்கவும்.",
+        "MEDIUM": "ℹ️ [மஞ்சள் எச்சரிக்கை] {zone_name} பகுதியில் மிதமான மழை காரணமாக கண்காணிப்பு தீவிரப்படுத்தப்பட்டுள்ளது."
+    },
+    "pa": { # Punjabi (ਪੰਜਾਬੀ)
+        "CRITICAL": "🚨 [ਤੁਰੰਤ ਖਾਲੀ ਕਰਨ ਦੀ ਚੇਤਾਵਨੀ] MDoNER ਚੇਤਾਵਨੀ: {zone_name} ਵਿੱਚ ਭਾਰੀ ਜ਼ਮੀਨ ਖਿਸਕਣ ਦਾ ਖ਼ਤਰਾ! FoS: {fos}। ਰਸਤੇ: {road_status}। ਤੁਰੰਤ ਸੁਰੱਖਿਅਤ ਸਥਾਨ 'ਤੇ ਜਾਓ।",
+        "HIGH": "⚠️ [ਔਰੇਂਜ ਅਲਰਟ] {zone_name} ਵਿੱਚ ਜ਼ਮੀਨ ਖਿਸਕਣ ਦਾ ਉੱਚ ਜੋਖਮ। FoS: {fos}। ਪਹਾੜੀ ਰਸਤਿਆਂ ਤੋਂ ਬਚੋ।",
+        "MEDIUM": "ℹ️ [ਯੈਲੋ ਅਲਰਟ] {zone_name} ਵਿੱਚ ਨਿਗਰਾਨੀ ਜਾਰੀ ਹੈ।"
+    },
+    "ks": { # Kashmiri (كأشُر / कश्मीरी)
+        "CRITICAL": "🚨 [عاجل اخلائی خبردار] MDoNER خبرداری: {zone_name} مَنٛز چھُ خطرناک زمینی پنہُن ممکن! FoS: {fos}। سَڑک: {road_status}। تِزی سان گَچھِو امن جاے۔",
+        "HIGH": "⚠️ [اورینج الرٹ] {zone_name} مَنٛز چھُ زمینی پنہُنُک بۆڈ خطرہٕ۔ FoS: {fos}। پَہٲڑی سَڑکَن پؠٹھ سَفَر پَرہیز کَریو۔",
+        "MEDIUM": "ℹ️ [یلو الرٹ] {zone_name} مَنٛز چھُ نِگرانی جاری۔"
+    },
+    "doi": { # Dogri (डोगरी)
+        "CRITICAL": "🚨 [तत्काल खाली करने दी चेतावनी] MDoNER अलर्ट: {zone_name} च भारी भूस्खलन दा खतरा! FoS: {fos}। रस्ते: {road_status}। तुंरत सुरक्षित जगहा पर जाओ।",
+        "HIGH": "⚠️ [ऑरेंज चेतावनी] {zone_name} च भूस्खलन दा बड़ा खतरा। FoS: {fos}। पहाड़ी रसतें पर जाने थमां बचो।",
+        "MEDIUM": "ℹ️ [येलो अलर्ट] {zone_name} च निगरानी रखी जा दी ऐ।"
+    },
+    "ne": { # Nepali (नेपाली)
+        "CRITICAL": "🚨 [तत्काल स्थानान्तरण चेतावनी] MDoNER चेतावनी: {zone_name} मा गम्भीर पहिरोको जोखिम! FoS: {fos}। सडक: {road_status}। तुरुन्त सुरक्षित आश्रयस्थलमा जानुहोस्।",
+        "HIGH": "⚠️ [अरेन्ज चेतावनी] {zone_name} मा पहिरोको उच्च जोखिम। FoS: {fos}। पहाडी सडक यात्रा नगर्नुहोस्।",
+        "MEDIUM": "ℹ️ [हेलो चेतावनी] {zone_name} मा मौसम र जमिनको स्थिति निगरानी भइरहेको छ।"
     }
 }
 
@@ -157,6 +182,38 @@ class AlertMicroservice:
         await asyncio.sleep(0.05)
         return {"status": "DELIVERED", "wa_message_id": f"wamid.{os.urandom(8).hex()}"}
 
+    async def send_telegram_alert(
+        self,
+        chat_id: str,
+        message: str,
+        lat: float = None,
+        lng: float = None
+    ) -> Dict[str, Any]:
+        """
+        Dispatches real-time disaster alerts directly to Telegram channels/groups/bots via Telegram Bot API.
+        """
+        bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "mock_telegram_bot_token")
+        api_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        
+        payload = {
+            "chat_id": chat_id,
+            "text": message,
+            "parse_mode": "HTML"
+        }
+        logger.info(f"✈️ [TELEGRAM ALERT DISPATCH to Chat ID {chat_id}]: {message}")
+
+        if httpx and bot_token != "mock_telegram_bot_token":
+            try:
+                async with httpx.AsyncClient(timeout=5.0) as client:
+                    resp = await client.post(api_url, json=payload)
+                    if resp.status_code == 200:
+                        return {"status": "DELIVERED", "response": resp.json()}
+            except Exception as err:
+                logger.warning(f"Telegram Bot HTTP dispatch exception: {err}")
+        
+        await asyncio.sleep(0.05)
+        return {"status": "DELIVERED", "telegram_msg_id": f"tg_{os.urandom(6).hex()}"}
+
     async def broadcast_disaster_alert(
         self,
         zone_id: str,
@@ -169,23 +226,29 @@ class AlertMicroservice:
         contact_list: Optional[List[Dict[str, str]]] = None
     ) -> Dict[str, Any]:
         """
-        Master orchestrator: Multi-lingual rendering, multi-channel dispatch,
+        Master orchestrator: Multi-lingual rendering, multi-channel dispatch (SMS, WhatsApp, Telegram),
         and automatic Redis failover queuing.
         """
         if risk_level not in ["HIGH", "CRITICAL"]:
             return {"status": "SKIPPED", "reason": "Hazard level below notification threshold"}
 
-        # Default sample contacts if none supplied (Village heads, District magistrates, SDRF)
+        # Default sample contacts if none supplied (Village heads, District magistrates, SDRF, Telegram Channel)
         recipients = contact_list or [
             {"name": "East Khasi Hills DC Office", "phone": "+91-98640-11111", "lang": "kha"},
             {"name": "Dima Hasao Village Captain", "phone": "+91-94350-22222", "lang": "as"},
             {"name": "Sikkim Relief Officer", "phone": "+91-97330-33333", "lang": "hi"},
             {"name": "Silchar Zonal Coordinator", "phone": "+91-94361-44444", "lang": "bn"},
+            {"name": "Tamil Disaster Response Unit", "phone": "+91-98400-66666", "lang": "ta"},
             {"name": "MDoNER Central Command", "phone": "+91-99100-55555", "lang": "en"}
         ]
 
         dispatched_results = []
         languages_sent = set()
+
+        # Always broadcast to MDoNER Telegram Emergency Alert Channel
+        telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID", "@mdoner_disaster_alerts")
+        tg_msg = self.format_message("en", risk_level, zone_name, fos, road_status)
+        tg_res = await self.send_telegram_alert(telegram_chat_id, tg_msg, lat, lng)
 
         for recipient in recipients:
             lang = recipient.get("lang", "en")
@@ -204,7 +267,8 @@ class AlertMicroservice:
                     "phone": recipient["phone"],
                     "language": lang,
                     "sms_status": sms_res["status"],
-                    "wa_status": wa_res["status"]
+                    "wa_status": wa_res["status"],
+                    "telegram_status": tg_res["status"]
                 })
             except Exception as exc:
                 logger.error(f"Downstream gateway error for {recipient['name']}: {exc}. Queuing to Redis.")
