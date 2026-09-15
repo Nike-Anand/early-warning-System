@@ -273,6 +273,14 @@ class TelegramBot:
         self.enabled = bool(self.token)
         self.api_base = f"https://api.telegram.org/bot{self.token}" if self.token else ""
         self.send_semaphore = asyncio.Semaphore(25)
+        # Designated officer(s)/official contacts that ALWAYS receive every alert
+        # (even if no citizen has subscribed for a given zone yet). Comma-separated
+        # numeric Telegram chat IDs, e.g. "123456789,987654321".
+        self.emergency_contacts = [
+            c.strip()
+            for c in os.getenv("TELEGRAM_EMERGENCY_CONTACT_CHAT_IDS", "").split(",")
+            if c.strip()
+        ]
 
     async def _api(self, method: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         if not self.enabled:
@@ -781,7 +789,18 @@ class TelegramBot:
         if not self.enabled:
             return {"status": "DISABLED", "sent": 0}
         subscribers = self.subscribers_for_zone(zone_id)
-        if not subscribers:
+
+        # Designated emergency contact(s) always receive the alert, so the person
+        # responsible for the affected area is reached even if no citizen has
+        # subscribed for this zone yet. They are treated as "official" recipients
+        # (enables critically-flag pinning in send_alert).
+        recipients: list[Dict[str, Any]] = [
+            {"chat_id": c, "language": "en", "role": "official"}
+            for c in self.emergency_contacts
+        ]
+        recipients.extend(subscribers)
+
+        if not recipients:
             return {"status": "NO_SUBSCRIBERS", "sent": 0}
 
         # Short Redis-based cooldown prevents repeat messages for the same zone/severity.
@@ -813,7 +832,7 @@ class TelegramBot:
                 logger.warning("Telegram delivery failed for %s: %s", sub["chat_id"], exc)
                 return {"chat_id": str(sub["chat_id"]), "status": "FAILED", "error": str(exc)}
 
-        results = await asyncio.gather(*(send_one(s) for s in subscribers))
+        results = await asyncio.gather(*(send_one(s) for s in recipients))
         sent = sum(1 for r in results if r["status"] == "DELIVERED")
         return {"status": "COMPLETED", "sent": sent, "failed": len(results) - sent, "results": results}
 

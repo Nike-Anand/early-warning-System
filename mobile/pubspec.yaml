@@ -42,6 +42,8 @@ dependencies:
   supabase_flutter: ^2.17.2
   google_fonts: ^8.2.1
   image_picker: ^1.2.3
+  flutter_local_notifications: ^18.0.1
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +66,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/sounds/siren_alert.wav
 
   # To add assets to your application, add an assets section, like this:
   # assets:

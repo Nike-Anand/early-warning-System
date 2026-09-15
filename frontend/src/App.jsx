@@ -248,6 +248,26 @@ const changeLanguage = (lang) => {
       if (r.syncedCount > 0) fetchData();
     });
 
+    // 1. Connect to local backend WebSocket for immediate real-time push events (the "script")
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsHost = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
+    const wsUrl = `${wsProtocol}//${wsHost}/ws/alerts`;
+    
+    const ws = new WebSocket(wsUrl);
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === 'CITIZEN_REPORT_SUBMITTED') {
+          // Immediately reflect new report in feed
+          setCitizenReports(prev => [data, ...prev]);
+        } else if (data.event === 'NEW_ALERT') {
+          // You could handle other events here
+        }
+      } catch (err) {
+        console.error("WS parse error:", err);
+      }
+    };
+
     // POLLING FALLBACK: Poll Supabase every 5 seconds 
     // This ensures reports reflect immediately even if Supabase Realtime isn't configured in the DB.
     const pollInterval = setInterval(async () => {
@@ -281,6 +301,7 @@ const changeLanguage = (lang) => {
     return () => {
       clearInterval(pollInterval);
       supabase.removeChannel(channel);
+      ws.close();
     };
   }, [fetchData]);
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'alert_notification_service.dart';
 import 'field_report_screen.dart';
 import 'offline_sync_engine.dart';
 
@@ -12,6 +13,10 @@ void main() async {
     url: 'https://ftoswgnwivydxmdxphgf.supabase.co',
     anonKey: 'sb_publishable_zUkFXvShYk-MKATo8zj49A_KPokqX62',
   );
+
+  // Emergency alert notifications with siren sound (polls the backend).
+  await AlertNotificationService.instance.initialize();
+  AlertMonitor().start();
 
   OfflineSyncEngine.initializeNetworkObserver();
   runApp(MyApp());
