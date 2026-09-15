@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mdoner-postgis-db
+  namespace: mdoner-disaster-system
+spec:
+  serviceName: "postgis-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mdoner-postgis
+  template:
+    metadata:
+      labels:
+        app: mdoner-postgis
+    spec:
+      containers:
+        - name: postgis
+          image: postgis/postgis:15-3.3
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: "mdoner_gis"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mdoner-secrets
+                  key: db-password
+          volumeMounts:
+            - name: postgis-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "8Gi"
+              cpu: "4000m"
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "mdoner_gis"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "mdoner_gis"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: postgis-data
+          persistentVolumeClaim:
+            claimName: postgis-spatial-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgis-service
+  namespace: mdoner-disaster-system
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  selector:
+    app: mdoner-postgis

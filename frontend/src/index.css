@@ -1,0 +1,106 @@
+@import "leaflet/dist/leaflet.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base Reset & Typography */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #030712;
+  color: #f8fafc;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f293d;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* Leaflet Canvas Container Dark Theme */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background-color: #0b0f19 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Dark Mode Leaflet Popup Overrides */
+.leaflet-popup-content-wrapper {
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6) !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 0.875rem !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-tip {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+}
+
+.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  padding: 8px !important;
+}
+.leaflet-popup-close-button:hover {
+  color: #ffffff !important;
+}
+
+/* Pulsing Radar Beacons for IoT Nodes */
+@keyframes radar-ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+.radar-beacon {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.radar-beacon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  animation: radar-ripple 2s infinite ease-out;
+}
+
+/* Custom Pulsing Polyline for Blocked Highways */
+.pulsing-highway-blocked {
+  stroke-dasharray: 8, 8;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
