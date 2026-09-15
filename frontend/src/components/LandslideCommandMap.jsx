@@ -467,14 +467,14 @@ export default function LandslideCommandMap({
       ))}
 
       {/* Citizen Reports Overlay */}
-      {citizenReports.map((report) => (
+      {citizenReports.filter(r => r.status === 'verified').map((report) => (
         <div 
-          key={report.report_id || report.id}
+          key={report.id || report.report_id}
           className="ze-marker absolute flex items-center justify-center w-6 h-6 bg-indigo-500/90 border border-white/50 backdrop-blur-md rounded-full pointer-events-auto shadow-lg z-40 transition-none hidden hover:scale-125 hover:z-50 cursor-pointer"
-          data-lon={report.lng || report.lon}
-          data-lat={report.lat}
-          title={report.hazard_type || 'Citizen Report'}
-          onClick={() => handleSelect({ type: 'report', id: report.report_id || report.id, lng: report.lng || report.lon, lat: report.lat, zoom: 11 })}
+          data-lon={report.longitude || report.lng || report.lon}
+          data-lat={report.latitude || report.lat}
+          title={report.category || report.hazard_type || 'Citizen Report'}
+          onClick={() => handleSelect({ type: 'report', id: report.id || report.report_id, lng: report.longitude || report.lng || report.lon, lat: report.latitude || report.lat, zoom: 11 })}
         >
           <Camera size={12} className="text-white" />
         </div>

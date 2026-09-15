@@ -6,6 +6,7 @@ export default function CitizenFeedDrawer({
   onClose,
   reports = [],
   onVerifyReport = () => {},
+  onDeleteReport = () => {},
   onSelectLocation = () => {},
    t = (key) => key
 }) {
@@ -126,16 +127,25 @@ export default function CitizenFeedDrawer({
                   </span>
                 </div>
 
-                {/* Official Action: Verify */}
-                {!isVerified && (
+                {/* Official Action: Verify & Delete */}
+                <div className="flex space-x-2 mt-2">
+                  {!isVerified && (
+                    <button
+                      onClick={() => onVerifyReport(report.id || report.report_id)}
+                      className="flex-1 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors"
+                    >
+                      <ShieldCheck size={14} />
+                      <span>→ {t('verify_official_map')}</span>
+                    </button>
+                  )}
                   <button
-                    onClick={() => onVerifyReport(report.report_id)}
-                    className="w-full py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors"
+                    onClick={() => onDeleteReport(report.id || report.report_id)}
+                    className={`${isVerified ? 'w-full' : 'w-auto px-3'} py-1.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors`}
+                    title="Remove from system"
                   >
-                    <ShieldCheck size={14} />
-                    <span>→ {t('verify_official_map')}</span>
+                    <span>✕ {isVerified ? t('remove') : ''}</span>
                   </button>
-                )}
+                </div>
               </div>
             );
           })

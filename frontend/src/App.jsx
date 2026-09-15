@@ -796,10 +796,24 @@ const handleTriggerBroadcast = async (zoneProp) => {
         reports={citizenReports}
         onVerifyReport={async (id) => {
           try {
-            await fetch(`/api/v1/reports/${id}/verify`, { method: 'PATCH' });
+            let { error } = await supabase.from('Field_reports').update({ status: 'verified' }).eq('id', id);
+            if (error) {
+              await supabase.from('field_reports').update({ status: 'verified' }).eq('id', id);
+            }
             fetchData();
           } catch (e) {
             console.error("Verification failed:", e);
+          }
+        }}
+        onDeleteReport={async (id) => {
+          try {
+            let { error } = await supabase.from('Field_reports').delete().eq('id', id);
+            if (error) {
+              await supabase.from('field_reports').delete().eq('id', id);
+            }
+            fetchData();
+          } catch (e) {
+            console.error("Deletion failed:", e);
           }
         }}
         onSelectLocation={(coord) => setSelectedTarget(coord)}
