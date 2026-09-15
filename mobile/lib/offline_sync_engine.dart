@@ -22,13 +22,11 @@ class OfflineSyncEngine {
     final report = {
       'id': _uuid.v4(),
       'category': category,
-      'severity_estimate': severity,
-      'landmark_description': description,
-      'latitude': lat,
-      'longitude': lng,
-      'multimedia_url': imageUrl,
-      'reporter_name': name ?? 'Anonymous',
-      'user_email': mobile ?? '', // Storing mobile in user_email for schema compat
+      'severity_level': severity,
+      'physical_observations': description,
+      'geo_coordinates': '$lat, $lng',
+      'image_url': imageUrl,
+      'reported_by': name ?? 'Anonymous',
       'created_at': DateTime.now().toIso8601String(),
     };
 
