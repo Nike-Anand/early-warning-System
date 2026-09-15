@@ -1,0 +1,292 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { ShieldAlert, Camera, Wifi } from 'lucide-react';
+
+// Collapsible map legend — extracted as its own component to honour Rules of Hooks
+function MapLegend() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="absolute bottom-16 left-6 z-[1000] pointer-events-auto">
+      {/* Toggle chip */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center space-x-2 bg-black/70 hover:bg-black/90 backdrop-blur-xl px-3 py-2 rounded-2xl border border-white/10 shadow-2xl transition-all"
+      >
+        <ShieldAlert size={14} className="text-indigo-400 flex-shrink-0" />
+        <span className="text-[10px] font-bold text-slate-200 uppercase tracking-widest">Map Legend</span>
+        <span className="text-slate-400 text-[10px]">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {/* Expandable panel — pops upward */}
+      {open && (
+        <div className="absolute bottom-full mb-2 left-0 bg-black/75 backdrop-blur-xl p-3.5 rounded-2xl border border-white/10 shadow-2xl text-xs space-y-2 w-[200px]">
+          <div className="font-bold text-slate-200 uppercase tracking-widest text-[10px] flex items-center justify-between">
+            <span>Command Map Layer</span>
+            <ShieldAlert size={13} className="text-indigo-400" />
+          </div>
+          <div className="space-y-2 text-[11px] pt-1">
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-red-600 shadow-[0_0_8px_#ef4444] border-2 border-white flex-shrink-0"></span>
+              <span className="text-slate-200 font-medium">Verification (Delhi)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-amber-500 border border-white/50 flex items-center justify-center flex-shrink-0"><Wifi size={8} className="text-white"/></span>
+              <span className="text-slate-200 font-medium">IoT Sensor Node</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-indigo-500 border border-white/50 flex items-center justify-center flex-shrink-0"><Camera size={8} className="text-white"/></span>
+              <span className="text-slate-200 font-medium">Citizen Report</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-red-500/40 border border-red-500 flex-shrink-0"></div>
+              <span className="text-slate-200 font-medium">Critical Zone</span>
+            </div>
+            <div className="text-[9px] text-slate-400 text-center uppercase font-bold tracking-widest mt-2 border-t border-white/10 pt-2">
+              Zoom Earth HD Satellite Engine
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// OpenLayers Web Mercator Projection Math
+const R = 6378137;
+const EE = R * Math.PI;
+function mercator([lon, lat]) {
+  const x = lon / 180 * EE;
+  let y = R * Math.log(Math.tan(Math.PI * (lat + 90) / 360));
+  if (!isFinite(y)) y = (lat >= 0 ? 1 : -1) * EE;
+  return [x, Math.max(Math.min(y, EE), -EE)];
+}
+
+const getRiskColor = (status, alpha = 1.0) => {
+  switch (status) {
+    case 'CRITICAL': return `rgba(239, 68, 68, ${alpha})`; // EF4444
+    case 'HIGH': return `rgba(249, 115, 22, ${alpha})`; // F97316
+    case 'MEDIUM': return `rgba(234, 179, 8, ${alpha})`; // EAB308
+    default: return `rgba(34, 197, 94, ${alpha})`; // 22C55E
+  }
+};
+
+export default function LandslideCommandMap({
+  zones = [],
+  infrastructure = [],
+  sensorNodes = [],
+  citizenReports = [],
+  selectedTarget = null,
+  onTriggerAlert = () => {}
+}) {
+  const iframeRef = useRef(null);
+  const containerRef = useRef(null);
+  const rafRef = useRef(null);
+  const debugLogged = useRef(false);
+
+  // Handle Map Panning
+  useEffect(() => {
+    if (selectedTarget && iframeRef.current) {
+      try {
+        const cw = iframeRef.current.contentWindow;
+        if (cw && cw.__zeController && cw.__zeController.map) {
+          const map = cw.__zeController.map;
+          if (map.getView) {
+            const view = map.getView();
+            view.animate({
+              center: mercator([selectedTarget.lng, selectedTarget.lat]),
+              zoom: selectedTarget.zoom || 11,
+              duration: 1200
+            });
+          }
+        }
+      } catch (e) {
+        // Ignore cross-origin error
+      }
+    }
+  }, [selectedTarget]);
+
+  useEffect(() => {
+    // 60fps Application-Level Bridge to the Zoom Earth Map Engine
+    const updateMarkers = () => {
+      if (iframeRef.current && containerRef.current) {
+        try {
+          const cw = iframeRef.current.contentWindow;
+          const controller = cw.__zeController;
+          
+          if (!debugLogged.current && controller && controller.map) {
+            console.log("🟢 [LandslideCommandMap] Successfully bridged with Zoom Earth __zeController!");
+            debugLogged.current = true;
+          }
+          
+          if (controller && controller.map && controller.map.frameState) {
+            const map = controller.map;
+            
+            // 1. Sync all HTML markers (Nodes, Reports, Test points)
+            const markers = containerRef.current.querySelectorAll('.ze-marker');
+            markers.forEach(marker => {
+              const lon = parseFloat(marker.dataset.lon);
+              const lat = parseFloat(marker.dataset.lat);
+              if (!isNaN(lon) && !isNaN(lat)) {
+                const px = map.getPixelFromCoordinate(mercator([lon, lat]));
+                if (px) {
+                  marker.style.display = 'flex';
+                  // Center the element
+                  marker.style.transform = `translate3d(${px[0]}px, ${px[1]}px, 0) translate(-50%, -50%)`;
+                } else {
+                  marker.style.display = 'none';
+                }
+              }
+            });
+
+            // 2. Sync all SVG Geometries (Zones, Infrastructure)
+            const paths = containerRef.current.querySelectorAll('.ze-polygon');
+            paths.forEach(path => {
+              const type = path.dataset.type;
+              if (!path._parsedCoords && path.dataset.coords) {
+                path._parsedCoords = JSON.parse(path.dataset.coords);
+              }
+              const coords = path._parsedCoords;
+              if (!coords) return;
+              
+              if (type === 'Polygon' || type === 'MultiPolygon') {
+                let d = '';
+                // Flatten MultiPolygon to array of rings, Polygon is already array of rings
+                const rings = type === 'MultiPolygon' ? coords.flat(1) : coords; 
+                
+                rings.forEach(ring => {
+                  ring.forEach((pt, idx) => {
+                    const px = map.getPixelFromCoordinate(mercator(pt));
+                    if (px) {
+                      d += (idx === 0 ? 'M' : 'L') + px[0] + ',' + px[1] + ' ';
+                    }
+                  });
+                  d += 'Z ';
+                });
+                path.setAttribute('d', d.trim());
+              } else if (type === 'LineString') {
+                let d = '';
+                coords.forEach((pt, idx) => {
+                  const px = map.getPixelFromCoordinate(mercator(pt));
+                  if (px) {
+                    d += (idx === 0 ? 'M' : 'L') + px[0] + ',' + px[1] + ' ';
+                  }
+                });
+                path.setAttribute('d', d.trim());
+              }
+            });
+          }
+        } catch (e) {
+          if (!debugLogged.current) {
+             console.error("🔴 [LandslideCommandMap] Iframe bridge error:", e);
+             debugLogged.current = true; // Log once
+          }
+        }
+      }
+      rafRef.current = requestAnimationFrame(updateMarkers);
+    };
+
+    rafRef.current = requestAnimationFrame(updateMarkers);
+    
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  // Determine if backend is currently unavailable / empty
+  const isDataEmpty = zones.length === 0 && sensorNodes.length === 0 && citizenReports.length === 0;
+
+  return (
+    <div className="relative h-full w-full bg-[#111111] overflow-hidden" ref={containerRef}>
+      {/* Zoom Earth Core Engine */}
+      <iframe
+        ref={iframeRef}
+        id="ze-iframe"
+        sandbox="allow-scripts allow-same-origin"
+        src="/zoom_earth/index.html"
+        className="w-full h-full border-0 absolute top-0 left-0"
+        title="Zoom Earth Map Engine"
+      />
+      
+      {/* Offline / Empty State Banner */}
+      {isDataEmpty && (
+        <div className="absolute top-[80px] left-1/2 transform -translate-x-1/2 z-[1000] bg-black/60 backdrop-blur-xl px-4 py-2 rounded-full border border-rose-500/30 text-xs font-semibold text-rose-200 shadow-[0_0_15px_rgba(225,29,72,0.3)] pointer-events-none flex items-center space-x-2">
+          <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+          <span>Awaiting live telemetry (Backend offline)</span>
+        </div>
+      )}
+
+      {/* Geographically Locked SVG Layer (Polygons & Lines) */}
+      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-30" style={{ overflow: 'visible' }}>
+        {zones.map((zone, i) => (
+          <path 
+            key={`zone-${zone.properties?.zone_id || i}`}
+            className="ze-polygon pointer-events-auto cursor-pointer transition-opacity"
+            data-coords={JSON.stringify(zone.geometry?.coordinates || [])}
+            data-type={zone.geometry?.type}
+            fill={getRiskColor(zone.properties?.current_risk_status, 0.45)}
+            stroke={getRiskColor(zone.properties?.current_risk_status, 1.0)}
+            strokeWidth="2"
+            onMouseEnter={(e) => e.target.style.stroke = '#fff'}
+            onMouseLeave={(e) => e.target.style.stroke = getRiskColor(zone.properties?.current_risk_status, 1.0)}
+            onClick={() => onTriggerAlert(zone.properties)}
+          >
+            <title>{zone.properties?.zone_name} - {zone.properties?.current_risk_status}</title>
+          </path>
+        ))}
+        {infrastructure.map((infra, i) => (
+          <path 
+            key={`infra-${infra.properties?.element_id || i}`}
+            className="ze-polygon pointer-events-auto transition-opacity"
+            data-coords={JSON.stringify(infra.geometry?.coordinates || [])}
+            data-type={infra.geometry?.type}
+            fill="none"
+            stroke={infra.properties?.current_status === 'blocked' ? '#ef4444' : '#3b82f6'}
+            strokeWidth="3"
+            strokeDasharray={infra.properties?.current_status === 'blocked' ? '6,6' : 'none'}
+          >
+            <title>{infra.properties?.name} ({infra.properties?.current_status})</title>
+          </path>
+        ))}
+      </svg>
+
+      {/* HTML Marker Layer */}
+      {/* Geographically Locked New Delhi Marker */}
+      <div 
+        className="ze-marker absolute flex items-center justify-center w-5 h-5 bg-red-600 border-[3px] border-white rounded-full pointer-events-none shadow-[0_0_15px_rgba(220,38,38,0.9)] z-50 transition-none hidden"
+        data-lon={77.2090}
+        data-lat={28.6139}
+        title="Verification Target: New Delhi"
+      >
+        <div className="absolute inset-0 rounded-full animate-ping bg-red-400 opacity-75"></div>
+      </div>
+
+      {/* Sensor Nodes Overlay */}
+      {sensorNodes.map((node) => (
+        <div 
+          key={node.node_id || node.node_code}
+          className="ze-marker absolute flex items-center justify-center w-6 h-6 bg-amber-500/90 border border-white/50 backdrop-blur-md rounded-full pointer-events-auto shadow-lg z-40 transition-none hidden hover:scale-125 hover:z-50 cursor-pointer"
+          data-lon={node.lon || 91.88}
+          data-lat={node.lat || 25.75}
+          title={node.node_name || node.node_code}
+        >
+          <Wifi size={12} className="text-white" />
+        </div>
+      ))}
+
+      {/* Citizen Reports Overlay */}
+      {citizenReports.map((report) => (
+        <div 
+          key={report.report_id || report.id}
+          className="ze-marker absolute flex items-center justify-center w-6 h-6 bg-indigo-500/90 border border-white/50 backdrop-blur-md rounded-full pointer-events-auto shadow-lg z-40 transition-none hidden hover:scale-125 hover:z-50 cursor-pointer"
+          data-lon={report.lng || report.lon}
+          data-lat={report.lat}
+          title={report.hazard_type || 'Citizen Report'}
+        >
+          <Camera size={12} className="text-white" />
+        </div>
+      ))}
+
+      {/* Map Legend Overlay — Collapsible */}
+      <MapLegend />
+    </div>
+  );
+}

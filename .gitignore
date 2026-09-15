@@ -1,0 +1,67 @@
+# ==============================================================================
+# SIH ID 26001: MDoNER Landslide Risk Monitoring Platform
+# .gitignore — Do Not Commit Secrets or Large Auto-Generated Files
+# ==============================================================================
+
+# Environment & Secrets
+.env
+.env.local
+.env.production
+*.key
+*.pem
+*.cert
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env/
+.pyenv/
+
+# Pytest
+.pytest_cache/
+.cache/
+htmlcov/
+*.coverage
+.coverage
+
+# Node.js / Frontend
+node_modules/
+frontend/node_modules/
+mobile/node_modules/
+frontend/dist/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Database & Volume Data
+*.sqlite
+*.db
+mosquitto/data/
+postgres_data/
+redis_data/
+
+# Logs
+*.log
+logs/
+
+# Docker Build Context Caches
+.dockerignore

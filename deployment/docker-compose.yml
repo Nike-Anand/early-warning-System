@@ -1,0 +1,157 @@
+version: '3.8'
+
+# ==============================================================================
+# SIH ID 26001: AI-Based Early Warning & Landslide Risk Monitoring System in NER
+# Unified Multi-Container Production Docker Compose Orchestration
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. POSTGIS SPATIAL DATABASE CLUSTER
+  # ----------------------------------------------------------------------------
+  mdoner-gis-db:
+    image: postgis/postgis:15-3.3
+    container_name: mdoner-gis-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_secure_password_sih26001
+      POSTGRES_DB: mdoner_gis
+    ports:
+      - "5432:5432"
+    volumes:
+      - mdoner_spatial_data:/var/lib/postgresql/data
+      - ../database/init_spatial_db.sql:/docker-entrypoint-initdb.d/init_spatial_db.sql
+    command: >
+      postgres
+      -c shared_buffers=512MB
+      -c work_mem=16MB
+      -c maintenance_work_mem=128MB
+      -c max_connections=150
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mdoner_gis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mdoner-network
+
+  # ----------------------------------------------------------------------------
+  # 2. HIGH-SPEED CACHE & ALERT RETRY QUEUE BROKER (REDIS)
+  # ----------------------------------------------------------------------------
+  mdoner-cache-pubsub:
+    image: redis:7-alpine
+    container_name: mdoner-cache-pubsub
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - mdoner_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - mdoner-network
+
+  # ----------------------------------------------------------------------------
+  # 3. LOW-OVERHEAD FIELD INGESTION HARDWARE GATEWAY (ECLIPSE MOSQUITTO MQTT)
+  # ----------------------------------------------------------------------------
+  mdoner-mqtt-broker:
+    image: eclipse-mosquitto:2.0
+    container_name: mdoner-mqtt-broker
+    restart: always
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mdoner_mqtt_data:/mosquitto/data
+    networks:
+      - mdoner-network
+
+  # ----------------------------------------------------------------------------
+  # 4. CORE ANALYTICS ENGINE & MICROSERVICES LAYER (FastAPI)
+  # ----------------------------------------------------------------------------
+  mdoner-predictive-engine:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: mdoner-predictive-engine
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres_secure_password_sih26001@mdoner-gis-db:5432/mdoner_gis
+      - REDIS_URL=redis://mdoner-cache-pubsub:6379/0
+      - SMS_DLT_SENDER_ID=MDONER
+      - SMS_DLT_TEMPLATE_ID=1407161829000123
+    depends_on:
+      mdoner-gis-db:
+        condition: service_healthy
+      mdoner-cache-pubsub:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - mdoner-network
+
+  # ----------------------------------------------------------------------------
+  # 5. BACKGROUND MQTT TELEMETRY TRANSLATOR WORKER (PYTHON)
+  # ----------------------------------------------------------------------------
+  mdoner-mqtt-worker:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: mdoner-mqtt-worker
+    restart: always
+    command: ["python", "mqtt_worker.py"]
+    environment:
+      - MQTT_HOST=mdoner-mqtt-broker
+      - MQTT_PORT=1883
+      - MQTT_TOPIC=mdoner/ner/sensor/+/telemetry
+      - FASTAPI_INGEST_URL=http://mdoner-predictive-engine:8000/api/v1/telemetry
+    depends_on:
+      - mdoner-mqtt-broker
+      - mdoner-predictive-engine
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f mqtt_worker.py || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - mdoner-network
+
+  # ----------------------------------------------------------------------------
+  # 6. REACT COMMAND CENTER DASHBOARD (NGINX ALPINE)
+  # ----------------------------------------------------------------------------
+  mdoner-command-dashboard:
+    build:
+      context: ../
+      dockerfile: deployment/Dockerfile.frontend
+    container_name: mdoner-command-dashboard
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - mdoner-predictive-engine
+    networks:
+      - mdoner-network
+
+volumes:
+  mdoner_spatial_data:
+    driver: local
+  mdoner_redis_data:
+    driver: local
+  mdoner_mqtt_data:
+    driver: local
+
+networks:
+  mdoner-network:
+    driver: bridge
