@@ -10,11 +10,9 @@ An industry-grade, fully integrated geotechnical disaster monitoring and early-w
 
 ## 📸 Platform Interface
 
-*(Upload and replace the placeholders below with your UI screenshots)*
-
-| GIS Command Dashboard | Mobile Field App |
-| :---: | :---: |
-| <img src="https://via.placeholder.com/600x350?text=GIS+Dashboard+Screenshot" alt="Dashboard" width="600"/> | <img src="https://via.placeholder.com/300x500?text=Mobile+App+Screenshot" alt="Mobile App" width="300"/> |
+| GIS Command Dashboard | Mobile Field App | Telegram Alert Bot |
+| :---: | :---: | :---: |
+| <img src="assets/web_ui.gif" alt="GIS Dashboard" width="500"/> | <img src="assets/app_ui.png" alt="Mobile App" width="250"/> | <img src="assets/telegram_bot.png" alt="Telegram Bot" width="250"/> |
 
 ---
 
