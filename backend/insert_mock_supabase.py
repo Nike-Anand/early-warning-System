@@ -2,10 +2,11 @@ import requests
 import json
 import uuid
 import datetime
+import os
 
-SUPABASE_URL = 'https://ftoswgnwivydxmdxphgf.supabase.co'
+SUPABASE_URL = os.getenv('SUPABASE_URL', 'YOUR_SUPABASE_URL_HERE')
 # Assuming the publishable key acts as the anon key for REST access
-SUPABASE_KEY = 'sb_publishable_zUkFXvShYk-MKATo8zj49A_KPokqX62'
+SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'YOUR_SUPABASE_KEY_HERE')
 
 # Ensure you have your actual anon key if the above is not correct. 
 # We'll try it first!

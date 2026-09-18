@@ -8,10 +8,10 @@ import 'offline_sync_engine.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // TODO: Replace with actual Supabase URL and Anon Key
+  // TODO: Replace with actual Supabase URL and Anon Key from environment
   await Supabase.initialize(
-    url: 'https://ftoswgnwivydxmdxphgf.supabase.co',
-    anonKey: 'sb_publishable_zUkFXvShYk-MKATo8zj49A_KPokqX62',
+    url: const String.fromEnvironment('SUPABASE_URL', defaultValue: 'YOUR_SUPABASE_URL_HERE'),
+    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'YOUR_SUPABASE_ANON_KEY_HERE'),
   );
 
   // Emergency alert notifications with siren sound (polls the backend).
